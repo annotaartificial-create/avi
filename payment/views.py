@@ -136,11 +136,13 @@ def initiate_deposit_view(request):
         raw_request={"phone": clean_phone, "amount": str(amount)},
     )
 
-    # Build webhook callback URL
+    # Build webhook callback URL (force https scheme so reverse proxies do not trigger 301/302 redirects)
     try:
         callback_url = request.build_absolute_uri(
             reverse("payment:webhook", kwargs={"provider_name": provider.name})
         )
+        if callback_url.startswith("http://"):
+            callback_url = "https://" + callback_url[7:]
     except Exception:
         callback_url = ""
 
@@ -335,7 +337,12 @@ def payment_webhook_view(request, provider_name: str):
     Public webhook receiver for incoming provider payment callbacks (PayHero, KopoKopo, Daraja).
     Parses payload, updates PaymentLedger, and credits user wallet idempotently.
     """
-    logger.info("Received payment webhook for provider '%s'", provider_name)
+    logger.info("Received payment webhook for provider '%s' (method: %s)", provider_name, request.method)
+
+    # Fast return for health check / verification pings without data
+    if request.method == "GET" and not request.GET and not request.body:
+        logger.info("Received empty GET ping for provider '%s', returning 200 OK", provider_name)
+        return JsonResponse({"status": "ok", "message": f"{provider_name} webhook ready"}, status=200)
 
     try:
         provider = get_payment_provider(provider_name)
@@ -343,9 +350,23 @@ def payment_webhook_view(request, provider_name: str):
         logger.error("Unknown provider for webhook '%s': %s", provider_name, exc)
         return JsonResponse({"status": "error", "message": f"Unknown provider: {provider_name}"}, status=400)
 
+    # Extract payload from GET query params, POST raw body, or POST form data
+    if request.method == "GET":
+        payload_data = request.GET.dict()
+    elif request.body:
+        payload_data = request.body
+    elif request.POST:
+        payload_data = request.POST.dict()
+    else:
+        payload_data = {}
+
+    if not payload_data:
+        logger.warning("Empty payload received for provider '%s', returning 200 OK", provider_name)
+        return JsonResponse({"status": "ok", "message": "Empty payload received"}, status=200)
+
     try:
         parsed = provider.parse_webhook(
-            raw_body=request.body,
+            raw_body=payload_data,
             headers=dict(request.headers),
         )
     except Exception as exc:

@@ -57,6 +57,10 @@ extra_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 if extra_csrf:
     CSRF_TRUSTED_ORIGINS.extend([origin.strip().rstrip('/') for origin in extra_csrf.split(",") if origin.strip()])
 
+# Trust Railway / reverse proxy SSL termination
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
 
 # Application definition
 

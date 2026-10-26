@@ -324,10 +324,12 @@ class PayHeroProvider(BasePaymentProvider):
         """
         if isinstance(raw_body, dict):
             payload = raw_body
+        elif not raw_body:
+            payload = {}
         else:
             try:
                 body_str = raw_body.decode("utf-8") if isinstance(raw_body, bytes) else str(raw_body)
-                payload = json.loads(body_str)
+                payload = json.loads(body_str) if body_str.strip() else {}
             except Exception as exc:
                 raise PaymentProviderError(f"Could not parse PayHero webhook JSON: {exc}") from exc
 
