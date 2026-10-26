@@ -68,7 +68,7 @@ def api_game_state(request):
             from payment.models import Wallet
             wallet, _ = Wallet.objects.get_or_create(
                 user=request.user,
-                defaults={'balance': getattr(request.user, 'balance', Decimal('0.00')) or Decimal('0.00')}
+                defaults={'balance': Decimal('0.00')}
             )
         user_balance = float(wallet.available_balance)
         for ub in active_round.bets.filter(user=request.user):

@@ -108,7 +108,7 @@ def initiate_deposit_view(request):
     # Ensure user has a wallet
     wallet, _ = Wallet.objects.get_or_create(
         user=request.user,
-        defaults={"balance": getattr(request.user, "balance", Decimal("0.00")) or Decimal("0.00")}
+        defaults={"balance": Decimal("0.00")}
     )
 
     # Generate unique system reference
@@ -450,7 +450,7 @@ def initiate_withdrawal_view(request):
     with transaction.atomic():
         wallet, _ = Wallet.objects.select_for_update().get_or_create(
             user=request.user,
-            defaults={"balance": getattr(request.user, "balance", Decimal("0.00")) or Decimal("0.00")}
+            defaults={"balance": Decimal("0.00")}
         )
 
         if wallet.available_balance < amount:

@@ -14,8 +14,7 @@ def ensure_user_wallet(sender, instance, created, **kwargs):
     Ensure every user has one and only one corresponding Wallet instance upon creation or update.
     The OneToOneField database constraint strictly guarantees that at most one wallet can ever exist per user.
     """
-    initial_balance = getattr(instance, 'balance', Decimal('0.00')) or Decimal('0.00')
     Wallet.objects.get_or_create(
         user=instance,
-        defaults={'balance': initial_balance}
+        defaults={'balance': Decimal('0.00')}
     )

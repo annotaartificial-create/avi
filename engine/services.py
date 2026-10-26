@@ -174,7 +174,7 @@ class EngineService:
                         from payment.models import Wallet
                         wallet, _ = Wallet.objects.select_for_update().get_or_create(
                             user_id=bet.user_id,
-                            defaults={'balance': getattr(bet.user, 'balance', Decimal('0.00'))}
+                            defaults={'balance': Decimal('0.00')}
                         )
                         wallet.settle_win(bet.stake, payout)
                     except Exception:
@@ -212,7 +212,7 @@ class EngineService:
             user_locked = User.objects.select_for_update().get(id=user.id)
             wallet, _ = Wallet.objects.select_for_update().get_or_create(
                 user=user_locked,
-                defaults={'balance': user_locked.balance}
+                defaults={'balance': Decimal('0.00')}
             )
 
             if wallet.available_balance < stake:
@@ -300,7 +300,7 @@ class EngineService:
                 from payment.models import Wallet
                 wallet, _ = Wallet.objects.select_for_update().get_or_create(
                     user_id=user.id,
-                    defaults={'balance': getattr(user, 'balance', Decimal('0.00'))}
+                    defaults={'balance': Decimal('0.00')}
                 )
                 wallet.settle_win(bet.stake, payout)
             except Exception:

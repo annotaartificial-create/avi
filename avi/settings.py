@@ -40,20 +40,22 @@ ALLOWED_HOSTS = ["*"]
 
 # CSRF Trusted Origins for Railway HTTPS domains and custom domains
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.railway.app",
-    "https://*.up.railway.app",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "https://skymaxwin.site/",
-    "https://www.skymaxwin.site/",
+    origin.rstrip("/") for origin in [
+        "https://*.railway.app",
+        "https://*.up.railway.app",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://skymaxwin.site",
+        "https://www.skymaxwin.site",
+    ]
 ]
 if os.getenv("RAILWAY_PUBLIC_DOMAIN"):
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN')}")
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN').rstrip('/')}")
 if os.getenv("CUSTOM_DOMAIN"):
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('CUSTOM_DOMAIN')}")
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('CUSTOM_DOMAIN').rstrip('/')}")
 extra_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 if extra_csrf:
-    CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in extra_csrf.split(",") if origin.strip()])
+    CSRF_TRUSTED_ORIGINS.extend([origin.strip().rstrip('/') for origin in extra_csrf.split(",") if origin.strip()])
 
 
 # Application definition

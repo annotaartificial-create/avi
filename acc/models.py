@@ -95,7 +95,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         _('wallet balance'),
         max_digits=12,
         decimal_places=2,
-        default=Decimal('1000.00'),
+        default=Decimal('0.00'),
         help_text=_('Player available balance in KES')
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
@@ -131,7 +131,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             return self.wallet
         except Exception:
             from payment.models import Wallet
-            wallet, _ = Wallet.objects.get_or_create(user=self, defaults={'balance': self.balance})
+            wallet, _ = Wallet.objects.get_or_create(user=self, defaults={'balance': Decimal('0.00')})
             return wallet
 
 
