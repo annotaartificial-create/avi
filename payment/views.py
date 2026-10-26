@@ -60,7 +60,6 @@ def _normalize_kenyan_phone(phone: str) -> str:
 
 
 @login_required
-@require_POST
 def initiate_deposit_view(request):
     """
     Initiates an M-Pesa STK push deposit for the authenticated user.
