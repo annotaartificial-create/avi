@@ -1,0 +1,92 @@
+{% extends "legal/base.html" %}
+
+{% block legal_title %}Responsible Gaming{% endblock %}
+{% block breadcrumb_title %}Responsible Gaming{% endblock %}
+{% block legal_heading %}Responsible Gaming Policy{% endblock %}
+{% block legal_description %}
+Guidelines, deposit controls, and player protection tools to help you keep multiplier gaming entertaining and strictly within your personal budget.
+{% endblock %}
+
+{% block legal_content %}
+<div class="space-y-10 text-slate-700 text-sm sm:text-[15px] leading-relaxed">
+    
+    <!-- 18+ Advisory Banner -->
+    <div class="p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-800 font-extrabold text-base flex items-center justify-center flex-shrink-0">
+            18+
+        </div>
+        <div>
+            <h3 class="text-[#101820] font-bold text-sm">Underage Play is Strictly Prohibited</h3>
+            <p class="text-xs text-amber-800/90 mt-0.5 leading-relaxed">
+                {{ site_settings.name|default:"Avingine" }} enforces age verification. Any account discovered to belong to someone under the age of 18 will be permanently closed.
+            </p>
+        </div>
+    </div>
+
+    <!-- Section 1 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">1.0</span>
+            <span>Playing Responsibly</span>
+        </h2>
+        <p>
+            Multiplier games are designed strictly for entertainment. Never gamble with money you cannot afford to lose, and never view gaming as a way to earn an income or recover debts.
+        </p>
+    </section>
+
+    <!-- Section 2: Player Controls -->
+    <section class="space-y-4">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">2.0</span>
+            <span>Self-Control Tools</span>
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                <h3 class="text-[#101820] font-semibold text-sm">Deposit Limits</h3>
+                <p class="text-xs text-slate-600">
+                    Set daily, weekly, or monthly deposit ceilings. Increases require a mandatory cooling-off waiting period.
+                </p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                <h3 class="text-[#101820] font-semibold text-sm">Take a Break</h3>
+                <p class="text-xs text-slate-600">
+                    Temporarily pause your account from placing bets for 24 hours, 7 days, or 30 days.
+                </p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                <h3 class="text-[#101820] font-semibold text-sm">Self-Exclusion</h3>
+                <p class="text-xs text-slate-600">
+                    Request complete self-exclusion for 6 months or permanently. All promotional outreach is blocked and remaining balances returned.
+                </p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                <h3 class="text-[#101820] font-semibold text-sm">Reality Checks</h3>
+                <p class="text-xs text-slate-600">
+                    View on-screen summaries of your elapsed session duration and net spend to stay in control.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Counseling -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">3.0</span>
+            <span>Help & Support Resources</span>
+        </h2>
+        <p class="text-xs text-slate-600">
+            If you or someone you know is struggling with gambling habits, free and confidential support is available:
+        </p>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+            <div>
+                <span class="font-bold text-sm text-[#101820] block">BeGambleAware</span>
+                <span class="text-xs text-slate-500">24/7 confidential helpline and guidance</span>
+            </div>
+            <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-[#101820] hover:text-[#00D084] underline">
+                Visit website &rarr;
+            </a>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

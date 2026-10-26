@@ -1,0 +1,234 @@
+<!-- Ultra-Premium Slide-Over Sidebar Drawer -->
+<div id="app-sidebar-root" class="relative z-50">
+    
+    <!-- Backdrop Overlay with Rich Frosted Glass Blur -->
+    <div 
+        id="sidebar-backdrop" 
+        onclick="closeAppSidebar()" 
+        class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity duration-300 ease-in-out opacity-0 pointer-events-none z-50"
+        aria-hidden="true"
+    ></div>
+
+    <!-- Sliding Drawer Panel (100% Width) -->
+    <aside 
+        id="sidebar-panel" 
+        class="fixed inset-0 z-50 w-full h-full bg-white translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col justify-between overflow-hidden"
+        role="dialog" 
+        aria-modal="true" 
+        aria-label="Navigation Menu"
+    >
+        
+        <!-- Header Bar -->
+        <div class="h-10 md:h-14 lg:h-16 px-6 sm:px-8 flex items-center justify-between border-b border-slate-100 flex-shrink-0">
+            <a href="{% url 'main:landing' %}" onclick="closeAppSidebar()" class="flex items-center group transition-opacity hover:opacity-90">
+                {% include "includes/logo.html" with logo_text_class="text-[#101820]" %}
+            </a>
+            
+            <!-- Refined Close Button -->
+            <button 
+                type="button" 
+                onclick="closeAppSidebar()" 
+                class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-500 hover:text-[#101820] flex items-center justify-center transition-all duration-150 active:scale-95 cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-300"
+                aria-label="Close menu"
+            >
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Body Content -->
+        <div class="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-6">
+
+            <!-- Primary Action Card (Guest vs Authenticated) -->
+            {% if request.user.is_authenticated %}
+                <div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/80 shadow-sm space-y-3.5">
+                    <div class="flex items-center gap-3">
+                        <div class="relative w-11 h-11 rounded-xl bg-[#101820] text-[#00D084] flex items-center justify-center font-bold text-base font-mono shadow-sm">
+                            {{ request.user.email|slice:":1"|upper }}
+                            <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#00D084] border-2 border-white rounded-full"></span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-[14px] font-bold text-[#101820] truncate">{{ request.user.display_name }}</div>
+                            <div class="text-[12px] font-mono font-bold text-[#00D084] truncate">{{ request.user.balance|floatformat:2 }} KES</div>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'engine:game' %}" onclick="closeAppSidebar()" class="w-full h-11 rounded-xl font-bold text-xs text-[#101820] bg-[#00D084] hover:bg-[#00b875] flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                        <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                        <span>Launch Cockpit (Play Now)</span>
+                    </a>
+
+                    <div class="grid grid-cols-2 gap-2 pt-0.5">
+                        <a href="{% url 'acc:dashboard' %}" onclick="closeAppSidebar()" class="h-9 rounded-xl font-semibold text-xs text-slate-700 border border-slate-200 bg-white hover:bg-slate-100 flex items-center justify-center transition-colors">
+                            Dashboard
+                        </a>
+                        <a href="{% url 'acc:logout' %}" class="h-9 rounded-xl font-medium text-xs text-slate-600 border border-slate-200 bg-white hover:bg-slate-100 flex items-center justify-center transition-colors">
+                            Sign out
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="p-4 rounded-2xl bg-gradient-to-b from-slate-50 to-white border border-slate-200/80 shadow-sm space-y-3.5">                   
+                    <a href="{% url 'engine:game' %}" onclick="closeAppSidebar()" class="w-full h-11 rounded-xl bg-[#00D084] hover:bg-[#00b875] text-[#101820] font-bold text-[14px] flex items-center justify-center gap-2 shadow-sm transition-all duration-150 active:scale-[0.98]">
+                        <span>Play now</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+
+                    <div class="flex items-center justify-center gap-1.5 text-xs text-slate-500 pt-0.5">
+                        <span>Already have an account?</span>
+                        <a href="{% url 'acc:login' %}" onclick="closeAppSidebar()" class="font-semibold text-[#101820] hover:text-[#00D084] transition-colors underline-offset-2 hover:underline">
+                            Sign in
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Section 1: The Game Platform -->
+            <div class="space-y-2">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2">
+                    Platform
+                </div>
+                <nav class="space-y-1">
+                    <a href="{% url 'main:landing' %}#how-it-works" onclick="closeAppSidebar()" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-150">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100/80 group-hover:bg-[#00D084]/15 text-slate-500 group-hover:text-[#008f5c] flex items-center justify-center transition-colors">
+                                <i data-lucide="play-circle" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="text-[14px] font-semibold text-[#101820] group-hover:text-[#00D084] transition-colors">How to play</div>
+                                <div class="text-[11px] text-slate-400">Rules & game loop</div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all"></i>
+                    </a>
+
+                    <a href="{% url 'main:landing' %}#fairness" onclick="closeAppSidebar()" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-150">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100/80 group-hover:bg-[#00D084]/15 text-slate-500 group-hover:text-[#008f5c] flex items-center justify-center transition-colors">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="text-[14px] font-semibold text-[#101820] group-hover:text-[#00D084] transition-colors">Provably Fair</div>
+                                <div class="text-[11px] text-slate-400">Cryptographic audit</div>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'main:legal_rules' %}" onclick="closeAppSidebar()" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-150">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100/80 group-hover:bg-[#00D084]/15 text-slate-500 group-hover:text-[#008f5c] flex items-center justify-center transition-colors">
+                                <i data-lucide="binary" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <div class="text-[14px] font-semibold text-[#101820] group-hover:text-[#00D084] transition-colors">Game rules</div>
+                                <div class="text-[11px] text-slate-400">Multipliers & payouts</div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all"></i>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Section 2: Legal & Protection -->
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-2">
+                    Legal & Trust
+                </div>
+                <nav class="space-y-1">
+                    <a href="{% url 'main:legal_terms' %}" onclick="closeAppSidebar()" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-150">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100/80 group-hover:bg-slate-200/80 text-slate-500 group-hover:text-[#101820] flex items-center justify-center transition-colors">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-[14px] font-medium text-slate-700 group-hover:text-[#101820] transition-colors">Terms of Service</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all"></i>
+                    </a>
+
+                    <a href="{% url 'main:legal_privacy' %}" onclick="closeAppSidebar()" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-150">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100/80 group-hover:bg-slate-200/80 text-slate-500 group-hover:text-[#101820] flex items-center justify-center transition-colors">
+                                <i data-lucide="lock" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-[14px] font-medium text-slate-700 group-hover:text-[#101820] transition-colors">Privacy Policy</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all"></i>
+                    </a>
+
+                    <a href="{% url 'main:legal_responsible_gaming' %}" onclick="closeAppSidebar()" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-150">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100/80 group-hover:bg-slate-200/80 text-slate-500 group-hover:text-[#101820] flex items-center justify-center transition-colors">
+                                <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-[14px] font-medium text-slate-700 group-hover:text-[#101820] transition-colors">Responsible Gaming</span>
+                        </div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded text-amber-800 bg-amber-50 border border-amber-200">
+                            18+
+                        </span>
+                    </a>
+
+                    <a href="{% url 'main:legal_aml' %}" onclick="closeAppSidebar()" class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-all duration-150">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-slate-100/80 group-hover:bg-slate-200/80 text-slate-500 group-hover:text-[#101820] flex items-center justify-center transition-colors">
+                                <i data-lucide="landmark" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-[14px] font-medium text-slate-700 group-hover:text-[#101820] transition-colors">AML & KYC Policy</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all"></i>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Clean Regulatory & Support Footer -->
+        <div class="px-6 sm:px-8 py-5 border-t border-slate-100 bg-slate-50/60 flex-shrink-0 space-y-3">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+                <span class="flex items-center gap-1.5">
+                    <i data-lucide="headset" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span>Support</span>
+                </span>
+                <a href="mailto:{{ site_settings.contact_email|default:'support@avingine.com' }}" class="font-semibold text-[#101820] hover:text-[#00D084] transition-colors">
+                    {{ site_settings.contact_email|default:'support@avingine.com' }}
+                </a>
+            </div>
+        </div>
+
+    </aside>
+</div>
+
+<!-- Drawer Controller Script -->
+<script>
+    function openAppSidebar() {
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const panel = document.getElementById('sidebar-panel');
+        if (!backdrop || !panel) return;
+
+        backdrop.classList.remove('pointer-events-none', 'opacity-0');
+        backdrop.classList.add('opacity-100');
+        panel.classList.remove('translate-x-full');
+        panel.classList.add('translate-x-0');
+        document.body.style.overflow = 'hidden';
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+    function closeAppSidebar() {
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const panel = document.getElementById('sidebar-panel');
+        if (!backdrop || !panel) return;
+
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        panel.classList.remove('translate-x-0');
+        panel.classList.add('translate-x-full');
+        document.body.style.overflow = '';
+    }
+
+    // Keyboard ESC listener
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAppSidebar();
+        }
+    });
+</script>

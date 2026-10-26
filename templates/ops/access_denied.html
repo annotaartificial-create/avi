@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Restricted | Avingine Ops</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full flex items-center justify-center p-4 font-sans text-slate-800">
+    <div class="max-w-md w-full bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 text-center space-y-4">
+        <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto border border-amber-100">
+            <i data-lucide="shield-alert" class="w-7 h-7"></i>
+        </div>
+        
+        <div class="space-y-1">
+            <h1 class="text-xl font-extrabold text-slate-900">Access Restricted</h1>
+            <p class="text-xs text-slate-500">
+                You do not have the required permissions (<strong class="text-slate-800">{{ required_role|default:"Ops Staff" }}</strong>) to access this administrative portal.
+            </p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 text-left text-xs space-y-1 font-mono">
+            <div class="text-slate-400">Authenticated Account:</div>
+            <div class="font-bold text-slate-800 truncate">{{ request.user.email }}</div>
+            <div class="text-[11px] text-slate-500 pt-1">
+                Ops Flag: <span class="{% if request.user.is_ops %}text-emerald-600 font-bold{% else %}text-rose-500 font-bold{% endif %}">{{ request.user.is_ops|yesno:"ENABLED,DISABLED" }}</span> | 
+                Marketer Flag: <span class="{% if request.user.is_marketer %}text-emerald-600 font-bold{% else %}text-slate-400{% endif %}">{{ request.user.is_marketer|yesno:"ENABLED,DISABLED" }}</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-2 pt-2">
+            <a href="{% url 'engine:game' %}" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+                <span>Return to Flight Cockpit</span>
+            </a>
+            <a href="{% url 'acc:logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="w-full py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition-colors">
+                Sign in with another account
+            </a>
+            <form id="logout-form" action="{% url 'acc:logout' %}" method="post" class="hidden">
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

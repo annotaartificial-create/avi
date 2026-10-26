@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full {% block html_class %}light{% endblock %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{{ site_settings.name|default:"Avingine" }} | Market Engine{% endblock %}</title>
+    
+    <!-- Meta SEO -->
+    {% block meta %}
+    <meta name="description" content="{{ site_settings.tagline|default:'Next generation high-frequency trading and market engine.' }}">
+    {% endblock %}
+
+    <!-- Favicon -->
+    {% if site_settings.favicon %}
+        <link rel="icon" href="{{ site_settings.favicon.url }}">
+    {% else %}
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23101820'/><path d='M10 23L16 9L22 23H18.5L16 16.5L13.5 23H10Z' fill='%2300D084'/></svg>">
+    {% endif %}
+
+    <!-- Google Fonts: Geist & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind CSS with Custom Config via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Geist"', '"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            200: '#bcccdc',
+                            300: '#9fb3c8',
+                            400: '#829ab1',
+                            500: '#627d98',
+                            600: '#486581',
+                            700: '#334e68',
+                            800: '#1c2b3a',
+                            850: '#15202b',
+                            900: '#101820', // Core Sportsbook Navy
+                            950: '#0a0f15',
+                        },
+                        green: {
+                            50: '#e6fcf3',
+                            100: '#b3f7dc',
+                            200: '#80f1c4',
+                            300: '#4debac',
+                            400: '#1ae595',
+                            500: '#00D084', // Core Action / Odds Green
+                            600: '#00b875',
+                            700: '#008f5c',
+                            800: '#006642',
+                            900: '#003d27',
+                        },
+                        brand: {
+                            DEFAULT: '#00D084',
+                            navy: '#101820',
+                            green: '#00D084',
+                            50: '#e6fcf3',
+                            100: '#b3f7dc',
+                            400: '#1ae595',
+                            500: '#00D084',
+                            600: '#00b875',
+                            700: '#008f5c',
+                        },
+                        surface: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            800: '#1c2b3a',
+                            850: '#15202b',
+                            900: '#101820',
+                            950: '#0a0f15',
+                        }
+                    },
+                    boxShadow: {
+                        'glow': '0 0 25px -5px rgba(16, 185, 129, 0.3)',
+                        'glow-accent': '0 0 25px -5px rgba(59, 130, 246, 0.3)',
+                        'inner-glass': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.08)',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-8px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbars & smooth typography */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+
+        /* Ambient background glow utilities */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}min-h-full bg-white text-slate-900 flex flex-col selection:bg-[#00D084]/20 selection:text-[#101820] antialiased font-sans relative overflow-x-hidden{% endblock %}">
+
+    <!-- Ambient Background (empty by default) -->
+    {% block ambient_background %}{% endblock %}
+
+    <!-- Global Toast / Django Messages Notifications -->
+    {% block toast_notifications %}
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-md w-full px-4 pointer-events-none">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast-message pointer-events-auto flex items-start gap-3 p-4 rounded-xl shadow-xl transition-all duration-300 transform translate-y-0
+                    {% if message.tags == 'error' %}
+                        bg-red-950/80 border border-red-500/30 text-red-200
+                    {% elif message.tags == 'success' %}
+                        bg-brand-950/80 border border-brand-500/30 text-brand-200
+                    {% elif message.tags == 'warning' %}
+                        bg-amber-950/80 border border-amber-500/30 text-amber-200
+                    {% else %}
+                        bg-surface-850/90 border border-surface-700 text-slate-200
+                    {% endif %}
+                    backdrop-blur-md">
+                    
+                    <div class="flex-shrink-0 mt-0.5">
+                        {% if message.tags == 'error' %}
+                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-400"></i>
+                        {% elif message.tags == 'success' %}
+                            <i data-lucide="check-circle-2" class="w-5 h-5 text-brand-400"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-400"></i>
+                        {% else %}
+                            <i data-lucide="info" class="w-5 h-5 text-blue-400"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex-1 text-sm font-medium leading-relaxed">
+                        {{ message }}
+                    </div>
+
+                    <button type="button" onclick="this.closest('.toast-message').remove()" class="flex-shrink-0 text-slate-400 hover:text-slate-100 transition-colors p-1">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% endblock %}
+
+    <!-- Main Content Area -->
+    <div class="relative z-10 flex-1 flex flex-col">
+        {% block body %}
+            {% block content %}{% endblock %}
+        {% endblock %}
+    </div>
+
+    <!-- Global Lucide Icon Initialization & Base Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // Auto dismiss toast messages after 6 seconds
+            const toasts = document.querySelectorAll('.toast-message');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    setTimeout(() => toast.remove(), 300);
+                }, 6000);
+            });
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,278 @@
+{% extends "ops/base.html" %}
+{% load humanize %}
+
+{% block title %}Marketer - Daily Deposits{% endblock %}
+{% block header_title %}Daily Completed Deposits{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Date Selector & Quick Filters -->
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        
+        <div>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-extrabold text-slate-900 leading-none">
+                        {{ selected_date|date:"l, F j, Y" }}
+                    </h2>
+                    <span class="text-[11px] text-slate-400 font-mono">
+                        {% if is_today %}
+                            <span class="inline-flex items-center gap-1 text-emerald-600 font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>Today's Live Deposits
+                            </span>
+                        {% else %}
+                            Historical Day View
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Selector Form -->
+        <form method="get" class="flex flex-wrap items-center gap-2 text-xs">
+            {% if query %}
+                <input type="hidden" name="q" value="{{ query }}">
+            {% endif %}
+
+            <a href="?date={{ today|date:'Y-m-d' }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-xl font-bold transition-all {% if is_today %}bg-slate-900 text-white shadow-xs{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                Today
+            </a>
+
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50/70">
+                <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-slate-400"></i>
+                <input 
+                    type="date" 
+                    name="date" 
+                    value="{{ selected_date_str }}" 
+                    max="{{ today|date:'Y-m-d' }}"
+                    onchange="this.form.submit()"
+                    class="bg-transparent text-xs font-mono font-bold text-slate-800 focus:outline-hidden cursor-pointer"
+                >
+            </div>
+        </form>
+
+    </div>
+
+    <!-- Daily Performance KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <!-- Total Volume -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+            <div class="flex items-center justify-between text-slate-400">
+                <span class="text-xs font-semibold uppercase tracking-wider font-mono">Total Deposits Paid</span>
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black font-mono text-emerald-600">+{{ total_day_amount|floatformat:2|intcomma }}</span>
+                <span class="text-xs font-bold text-slate-500 font-mono">KES</span>
+            </div>
+            <div class="pt-1 text-[11px] font-mono text-slate-400 border-t border-slate-100">
+                Confirmed via M-Pesa STK
+            </div>
+        </div>
+
+        <!-- Total Paid Count -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+            <div class="flex items-center justify-between text-slate-400">
+                <span class="text-xs font-semibold uppercase tracking-wider font-mono">Successful Transactions</span>
+                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black font-mono text-slate-900">{{ total_day_count }}</span>
+                <span class="text-xs text-slate-500">paid deposits</span>
+            </div>
+            <div class="pt-1 text-[11px] font-mono text-slate-400 border-t border-slate-100">
+                Settled to player wallets
+            </div>
+        </div>
+
+        <!-- Unique Depositors -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+            <div class="flex items-center justify-between text-slate-400">
+                <span class="text-xs font-semibold uppercase tracking-wider font-mono">Active Depositors</span>
+                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black font-mono text-slate-900">{{ unique_depositors }}</span>
+                <span class="text-xs text-slate-500">unique users</span>
+            </div>
+            <div class="pt-1 text-[11px] font-mono text-slate-400 border-t border-slate-100">
+                Players depositing today
+            </div>
+        </div>
+
+        <!-- Average Deposit Size -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-2">
+            <div class="flex items-center justify-between text-slate-400">
+                <span class="text-xs font-semibold uppercase tracking-wider font-mono">Average Ticket Size</span>
+                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <i data-lucide="trending-up" class="w-4 h-4"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black font-mono text-slate-900">{{ avg_deposit|floatformat:2|intcomma }}</span>
+                <span class="text-xs font-bold text-slate-500 font-mono">KES</span>
+            </div>
+            <div class="pt-1 text-[11px] font-mono text-slate-400 border-t border-slate-100">
+                Per successful transaction
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Search within selected day's deposits -->
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            <form method="get" class="flex-1 max-w-md relative">
+                <input type="hidden" name="date" value="{{ selected_date_str }}">
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ query }}" 
+                        placeholder="Search by M-Pesa receipt, phone, or email..." 
+                        class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-slate-900 bg-slate-50/50"
+                    >
+                    {% if query %}
+                        <a href="?date={{ selected_date_str }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <div class="text-xs font-mono text-slate-500">
+                Day Records: <strong class="text-slate-900">{{ total_count }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Deposits Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 font-mono uppercase text-[10px]">
+                        <th class="p-3.5 pl-6">Time</th>
+                        <th class="p-3.5 font-mono">Amount Paid</th>
+                        <th class="p-3.5">M-Pesa Receipt Code</th>
+                        <th class="p-3.5">Depositor Phone</th>
+                        <th class="p-3.5">Player Account</th>
+                        <th class="p-3.5">Provider</th>
+                        <th class="p-3.5">Reference</th>
+                        <th class="p-3.5 pr-6 text-right">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-sans">
+                    {% for item in page_obj %}
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-3.5 pl-6 font-mono text-slate-700 font-semibold">
+                                <div>{{ item.completed_at|default:item.created_at|date:"H:i:s" }}</div>
+                                <div class="text-[10px] text-slate-400">{{ item.completed_at|default:item.created_at|date:"M d" }}</div>
+                            </td>
+
+                            <td class="p-3.5 font-mono font-black text-sm text-emerald-600">
+                                +{{ item.amount|floatformat:2|intcomma }} KES
+                            </td>
+
+                            <td class="p-3.5 font-mono">
+                                {% if item.receipt_number %}
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-extrabold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">{{ item.receipt_number }}</span>
+                                        <button type="button" onclick="copyToClipboard('{{ item.receipt_number }}')" class="text-slate-400 hover:text-slate-700 cursor-pointer" title="Copy receipt">
+                                            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <span class="text-slate-400 font-normal">{{ item.provider_reference|default:"-" }}</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="p-3.5 font-mono font-bold text-slate-800">
+                                {{ item.phone|default:"-" }}
+                            </td>
+
+                            <td class="p-3.5">
+                                <div class="font-bold text-slate-900 truncate max-w-[160px]">{{ item.user.email }}</div>
+                                <div class="text-[11px] text-slate-400 font-mono">@{{ item.user.username }}</div>
+                            </td>
+
+                            <td class="p-3.5">
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-mono text-[10px] uppercase font-semibold">
+                                    {{ item.provider }}
+                                </span>
+                            </td>
+
+                            <td class="p-3.5 font-mono text-slate-400 text-[11px]">
+                                {{ item.reference }}
+                            </td>
+
+                            <td class="p-3.5 pr-6 text-right">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                                    <i data-lucide="check" class="w-3 h-3"></i> PAID
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="p-10 text-center text-slate-400 space-y-2">
+                                <i data-lucide="inbox" class="w-10 h-10 mx-auto text-slate-300 stroke-1"></i>
+                                <p class="text-xs font-bold text-slate-700">No completed deposits found</p>
+                                <p class="text-[11px] text-slate-400">
+                                    There are no paid deposits recorded for {{ selected_date|date:"F j, Y" }}.
+                                </p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div>
+                    Page <span class="font-bold text-slate-900">{{ page_obj.number }}</span> of <span class="font-bold text-slate-900">{{ page_obj.paginator.num_pages }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&date={{ selected_date_str }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Previous
+                        </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&date={{ selected_date_str }}{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast(`Copied ${text} to clipboard`, 'success');
+        }).catch(() => {
+            showToast('Failed to copy', 'error');
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 text-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ page_title|default:"Dashboard" }}{% endblock %} | Avingine Ops</title>
+
+    <!-- Favicon -->
+    {% if site_settings.favicon %}
+        <link rel="icon" href="{{ site_settings.favicon.url }}">
+    {% else %}
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><path d='M10 23L16 9L22 23H18.5L16 16.5L13.5 23H10Z' fill='%23008f5c'/></svg>">
+    {% endif %}
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Geist"', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#008f5c',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Geist', system-ui, -apple-system, sans-serif;
+        }
+        /* Custom sleek scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full flex flex-col md:flex-row bg-[#f8fafc] text-slate-800 antialiased font-normal">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2.5 max-w-sm pointer-events-none"></div>
+
+    <!-- Django Messages (if any) -->
+    {% if messages %}
+        <div id="django-messages" class="hidden">
+            {% for message in messages %}
+                <span data-tag="{{ message.tags }}" data-text="{{ message|escapejs }}"></span>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Mobile Header -->
+    <div class="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <button type="button" onclick="toggleMobileSidebar()" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100 cursor-pointer">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-sm">
+                    OP
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold text-slate-900 leading-none">Avingine Ops</h1>
+                    <span class="text-[10px] text-slate-400 font-mono">Management Portal</span>
+                </div>
+            </div>
+        </div>
+        <a href="{% url 'engine:game' %}" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold hover:bg-emerald-100 transition-colors">
+            <i data-lucide="plane" class="w-3.5 h-3.5"></i>
+            <span>Play</span>
+        </a>
+    </div>
+
+    <!-- Sidebar Backdrop (Mobile) -->
+    <div id="sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 hidden md:hidden"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="ops-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col -translate-x-full md:translate-x-0 md:static md:z-0 transition-transform duration-200 ease-in-out">
+        <!-- Logo / Title -->
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm font-extrabold text-slate-900 tracking-tight leading-none">Avingine Ops</h2>
+                    <span class="text-[11px] font-mono text-emerald-600 font-semibold">Portal v2.0</span>
+                </div>
+            </div>
+            <button type="button" onclick="toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+            <div class="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Operations</div>
+            
+            {% if is_ops_staff %}
+                <a href="{% url 'ops:dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all {% if request.resolver_match.url_name == 'dashboard' %}bg-slate-900 text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span>Overview</span>
+                </a>
+            {% endif %}
+
+            <a href="{% url 'ops:marketer' %}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all {% if request.resolver_match.url_name == 'marketer' %}bg-slate-900 text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i>
+                    <span>Daily Deposits</span>
+                </div>
+                <span class="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold">MARKETER</span>
+            </a>
+
+            {% if is_ops_staff %}
+                <a href="{% url 'ops:payments' %}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all {% if request.resolver_match.url_name == 'payments' %}bg-slate-900 text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="receipt" class="w-4 h-4"></i>
+                        <span>Payments Ledger</span>
+                    </div>
+                    {% if pending_withdrawals_count %}
+                        <span class="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-mono font-bold">{{ pending_withdrawals_count }}</span>
+                    {% endif %}
+                </a>
+            {% endif %}
+
+            {% if is_ops_staff %}
+                <div class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Management</div>
+
+                <a href="{% url 'ops:users' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all {% if request.resolver_match.url_name == 'users' %}bg-slate-900 text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <span>Users & Roles</span>
+                </a>
+
+                <a href="{% url 'ops:wallets' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all {% if request.resolver_match.url_name == 'wallets' %}bg-slate-900 text-white shadow-xs{% else %}text-slate-600 hover:text-slate-900 hover:bg-slate-100{% endif %}">
+                    <i data-lucide="wallet" class="w-4 h-4"></i>
+                    <span>User Wallets</span>
+                </a>
+            {% endif %}
+
+            <div class="px-3 pt-4 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">Platform</div>
+
+            <a href="{% url 'engine:game' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all">
+                <i data-lucide="gamepad-2" class="w-4 h-4 text-emerald-600"></i>
+                <span>Flight Cockpit</span>
+            </a>
+
+            {% if request.user.is_superuser or request.user.is_staff %}
+                <a href="{% url 'admin:index' %}" target="_blank" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <span>Django Admin</span>
+                </a>
+            {% endif %}
+        </nav>
+
+        <!-- Current User Profile Footer -->
+        <div class="p-3 border-t border-slate-100 bg-slate-50/70">
+            <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
+                <div class="flex items-center gap-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white font-bold flex items-center justify-center text-xs shrink-0">
+                        {{ request.user.email|slice:":1"|upper }}
+                    </div>
+                    <div class="truncate">
+                        <div class="text-xs font-bold text-slate-900 truncate">{{ request.user.display_name }}</div>
+                        <div class="text-[10px] text-slate-400 font-mono truncate">{{ request.user.email }}</div>
+                    </div>
+                </div>
+                <form action="{% url 'acc:logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" title="Logout" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <!-- Top bar -->
+        <header class="hidden md:flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="flex items-center gap-3">
+                <h1 class="text-lg font-extrabold text-slate-900">{% block header_title %}{{ page_title }}{% endblock %}</h1>
+                {% block header_badge %}{% endblock %}
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="{% url 'engine:game' %}" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-colors">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-500"></i>
+                    <span>Launch Game</span>
+                </a>
+                <div class="h-4 w-px bg-slate-200"></div>
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>System Live</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Body -->
+        <div class="flex-1 p-4 sm:p-6 md:p-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Common JS Utilities -->
+    <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('ops-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        // CSRF Token Helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `p-3.5 rounded-xl shadow-lg border text-xs font-semibold flex items-center gap-3 transition-all transform duration-300 pointer-events-auto opacity-0 translate-y-2 ${
+                type === 'success' 
+                    ? 'bg-slate-900 text-white border-slate-800' 
+                    : type === 'error'
+                    ? 'bg-rose-900 text-white border-rose-800'
+                    : 'bg-white text-slate-900 border-slate-200'
+            }`;
+
+            const iconName = type === 'success' ? 'check-circle' : type === 'error' ? 'alert-triangle' : 'info';
+            toast.innerHTML = `
+                <i data-lucide="${iconName}" class="w-4 h-4 shrink-0 ${type === 'success' ? 'text-emerald-400' : 'text-rose-400'}"></i>
+                <span class="flex-1">${message}</span>
+                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white cursor-pointer">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            if (window.lucide) lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+
+            // Display Django messages as toasts
+            const msgContainer = document.getElementById('django-messages');
+            if (msgContainer) {
+                const items = msgContainer.querySelectorAll('span');
+                items.forEach(el => {
+                    const tag = el.getAttribute('data-tag') || 'info';
+                    const text = el.getAttribute('data-text');
+                    const type = tag.includes('error') ? 'error' : tag.includes('success') ? 'success' : 'info';
+                    showToast(text, type);
+                });
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

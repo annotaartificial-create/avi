@@ -1,0 +1,109 @@
+{% extends "legal/base.html" %}
+
+{% block legal_title %}Terms of Service{% endblock %}
+{% block breadcrumb_title %}Terms of Service{% endblock %}
+{% block legal_heading %}Terms of Service{% endblock %}
+{% block legal_description %}
+The binding agreement between you and {{ site_settings.name|default:"Avingine" }} governing your account, multiplier gaming, and ledger transactions.
+{% endblock %}
+
+{% block legal_content %}
+<div class="space-y-10 text-slate-700 text-sm sm:text-[15px] leading-relaxed">
+    
+    <!-- Advisory Notice -->
+    <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5"></i>
+        <div class="text-xs sm:text-sm">
+            <strong class="font-semibold text-amber-950">Age & Jurisdiction Requirement:</strong>
+            You must be at least 18 years of age to register, deposit funds, or participate in games on {{ site_settings.name|default:"Avingine" }}. Gambling involves financial risk.
+        </div>
+    </div>
+
+    <!-- Section 1 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">1.0</span>
+            <span>Introduction & Acceptance of Terms</span>
+        </h2>
+        <p>
+            Welcome to {{ site_settings.name|default:"Avingine" }} ("we," "our," or "the Platform"). These Terms of Service constitute a legally binding contract between you ("Player" or "User") and {{ site_settings.name|default:"Avingine" }}.
+        </p>
+        <p>
+            By registering an account, depositing funds, or placing bets in the game, you confirm that you have read, understood, and agreed to these Terms, along with our Privacy Policy, Game Rules, and Responsible Gaming Guidelines.
+        </p>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">2.0</span>
+            <span>Eligibility & Account Registration</span>
+        </h2>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li><strong>Minimum Age:</strong> You must be at least 18 years old. Underage accounts will be terminated immediately upon discovery and any deposited balance handled according to regulatory requirements.</li>
+            <li><strong>Single Account Policy:</strong> Each player is permitted exactly one (1) account. Registering duplicate accounts under alternative emails or phone numbers is strictly prohibited and subject to account freeze.</li>
+            <li><strong>Accurate Details:</strong> You agree to provide a valid, verifiable email address and mobile payment phone number registered under your own name.</li>
+            <li><strong>Account Security:</strong> You are responsible for safeguarding your credentials and two-factor recovery codes.</li>
+        </ul>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">3.0</span>
+            <span>Deposits, Withdrawals & Ledger Accounting</span>
+        </h2>
+        <p>
+            All monetary movements on {{ site_settings.name|default:"Avingine" }} are recorded on our centralized, single-source-of-truth <strong>Main Ledger</strong>:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                <h3 class="text-[#101820] font-semibold text-sm flex items-center gap-2">
+                    <i data-lucide="arrow-down-left" class="w-4 h-4 text-[#00D084]"></i>
+                    <span>Deposits</span>
+                </h3>
+                <p class="text-xs text-slate-600">
+                    Deposits via supported rails (such as M-Pesa Daraja or PayHero) are credited to your ledger balance in real time upon confirmation.
+                </p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                <h3 class="text-[#101820] font-semibold text-sm flex items-center gap-2">
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 text-[#00D084]"></i>
+                    <span>Withdrawals</span>
+                </h3>
+                <p class="text-xs text-slate-600">
+                    Cashouts are disbursed back to the verified originating mobile money phone number. Player funds are kept segregated from company operational accounts.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">4.0</span>
+            <span>Game Mechanics & Crash Finality</span>
+        </h2>
+        <p>
+            {{ site_settings.name|default:"Avingine" }} operates an Aviator-style ascending curve game:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li><strong>Cashout Timing:</strong> Players must manually click cash out (or hit an auto-cashout target) before the flight departs. Once the flight crashes, any bet that has not been cashed out is lost.</li>
+            <li><strong>Provable Fairness:</strong> Round coefficients are determined by a cryptographic hash combination generated before takeoff. Results cannot be modified mid-flight by either the player or the house.</li>
+            <li><strong>Automated Settlement:</strong> Successfully cashed-out bets are credited immediately to the ledger balance at the multiplier registered at the moment the cashout command reached the server.</li>
+        </ul>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">5.0</span>
+            <span>Governing Law</span>
+        </h2>
+        <p>
+            These Terms of Service are governed by the laws and gaming regulations of Kenya. For inquiries or dispute resolution, contact our team at <a href="mailto:{{ site_settings.contact_email|default:'support@avingine.com' }}" class="text-[#101820] font-semibold underline hover:text-[#00D084]">{{ site_settings.contact_email|default:'support@avingine.com' }}</a>.
+        </p>
+    </section>
+
+</div>
+{% endblock %}

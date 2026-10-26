@@ -1,0 +1,179 @@
+{% extends "acc/base.html" %}
+
+{% block title %}Sign up | {{ site_settings.name|default:"Avingine" }}{% endblock %}
+
+{% block auth_content %}
+<div class="w-full">
+    
+    <!-- Minimal Header -->
+    {% include "acc/includes/auth_header.html" with title="Sign up" subtitle="Create your account to get started." %}
+
+    <!-- Non-Field Form Errors -->
+    {% if form.non_field_errors %}
+        <div class="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2.5">
+            <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500"></i>
+            <div>
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Signup Form (Laying directly on the page) -->
+    <form method="POST" action="{% url 'acc:signup' %}" class="space-y-4" novalidate>
+        {% csrf_token %}
+
+        <!-- Floating Label Email Field -->
+        <div class="relative">
+            <input 
+                type="email" 
+                name="email" 
+                id="signup-email" 
+                required 
+                autocomplete="email"
+                value="{{ form.email.value|default:'' }}"
+                placeholder=" "
+                class="peer w-full h-[52px] px-3.5 bg-white border {% if form.email.errors %}border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500{% else %}border-slate-300 focus:border-[#101820] focus:ring-1 focus:ring-[#101820]{% endif %} rounded-xl text-[#101820] text-sm focus:outline-none transition-all duration-200"
+            >
+            <label 
+                for="signup-email" 
+                class="absolute left-3.5 bg-white px-1 font-medium transition-all duration-150 pointer-events-none
+                       {% if form.email.value %}
+                           -top-2.5 text-xs text-[#101820]
+                       {% else %}
+                           -top-2.5 text-xs text-[#101820] peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#101820]
+                       {% endif %}
+                       {% if form.email.errors %}!text-red-500{% endif %}"
+            >
+                Email
+            </label>
+            <p class="inline-error text-xs text-red-500 mt-1 pl-1 {% if not form.email.errors %}hidden{% endif %}" data-for="email">
+                {{ form.email.errors.0|default:'' }}
+            </p>
+        </div>
+
+        <!-- Floating Label Password Field -->
+        <div class="relative">
+            <input 
+                type="password" 
+                name="password" 
+                id="signup-password" 
+                required 
+                autocomplete="new-password"
+                placeholder=" "
+                class="peer w-full h-[52px] pl-3.5 pr-11 bg-white border {% if form.password.errors %}border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500{% else %}border-slate-300 focus:border-[#101820] focus:ring-1 focus:ring-[#101820]{% endif %} rounded-xl text-[#101820] text-sm focus:outline-none transition-all duration-200"
+            >
+            <label 
+                for="signup-password" 
+                class="absolute left-3.5 bg-white px-1 font-medium transition-all duration-150 pointer-events-none
+                       -top-2.5 text-xs text-[#101820] peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#101820]
+                       {% if form.password.errors %}!text-red-500{% endif %}"
+            >
+                Password
+            </label>
+            <button 
+                type="button" 
+                onclick="togglePasswordVisibility('signup-password', this)"
+                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#101820] transition-colors cursor-pointer"
+                aria-label="Toggle password visibility"
+            >
+                <i data-lucide="eye-off" class="w-[18px] h-[18px]"></i>
+            </button>
+            <p class="inline-error text-xs text-red-500 mt-1 pl-1 {% if not form.password.errors %}hidden{% endif %}" data-for="password">
+                {{ form.password.errors.0|default:'' }}
+            </p>
+        </div>
+
+        <!-- Floating Label Confirm Password Field -->
+        <div class="relative">
+            <input 
+                type="password" 
+                name="confirm_password" 
+                id="signup-confirm-password" 
+                required 
+                autocomplete="new-password"
+                placeholder=" "
+                class="peer w-full h-[52px] pl-3.5 pr-11 bg-white border {% if form.confirm_password.errors %}border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500{% else %}border-slate-300 focus:border-[#101820] focus:ring-1 focus:ring-[#101820]{% endif %} rounded-xl text-[#101820] text-sm focus:outline-none transition-all duration-200"
+            >
+            <label 
+                for="signup-confirm-password" 
+                class="absolute left-3.5 bg-white px-1 font-medium transition-all duration-150 pointer-events-none
+                       -top-2.5 text-xs text-[#101820] peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#101820]
+                       {% if form.confirm_password.errors %}!text-red-500{% endif %}"
+            >
+                Confirm Password
+            </label>
+            <button 
+                type="button" 
+                onclick="togglePasswordVisibility('signup-confirm-password', this)"
+                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#101820] transition-colors cursor-pointer"
+                aria-label="Toggle password visibility"
+            >
+                <i data-lucide="eye-off" class="w-[18px] h-[18px]"></i>
+            </button>
+            <p class="inline-error text-xs text-red-500 mt-1 pl-1 {% if not form.confirm_password.errors %}hidden{% endif %}" data-for="confirm_password">
+                {{ form.confirm_password.errors.0|default:'' }}
+            </p>
+        </div>
+
+        <!-- Terms of Service Agreement -->
+        <div class="pt-1">
+            <label class="flex items-start gap-2.5 cursor-pointer select-none">
+                <input 
+                    type="checkbox" 
+                    name="terms" 
+                    id="signup-terms" 
+                    required
+                    {% if form.terms.value %}checked{% endif %}
+                    class="w-4 h-4 mt-0.5 rounded border-slate-300 text-[#101820] focus:ring-0 cursor-pointer"
+                >
+                <span class="text-xs text-slate-500 leading-normal">
+                    I agree to the <a href="#" class="text-[#101820] font-medium hover:text-[#00D084]">Terms of Service</a> and Privacy Policy.
+                </span>
+            </label>
+            <p class="inline-error text-xs text-red-500 mt-1 pl-1 {% if not form.terms.errors %}hidden{% endif %}" data-for="terms">
+                {{ form.terms.errors.0|default:'' }}
+            </p>
+        </div>
+
+        <!-- Submit Button (Green #00D084) -->
+        <button 
+            type="submit" 
+            id="signup-submit-btn"
+            class="w-full h-[48px] rounded-xl font-bold text-[15px] text-[#101820] bg-[#00D084] hover:bg-[#00b875] shadow-sm transition-all duration-200 flex items-center justify-center cursor-pointer mt-3"
+        >
+            Sign up
+        </button>
+    </form>
+
+    <!-- Switch to Login -->
+    <div class="mt-7 text-left">
+        <p class="text-[13px] text-slate-500">
+            Already have an account?
+            <a href="{% url 'acc:login' %}" class="font-semibold text-[#101820] hover:text-[#00D084] transition-colors ml-1">
+                Sign in
+            </a>
+        </p>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function togglePasswordVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = '<i data-lucide="eye" class="w-[18px] h-[18px]"></i>';
+        } else {
+            input.type = 'password';
+            btn.innerHTML = '<i data-lucide="eye-off" class="w-[18px] h-[18px]"></i>';
+        }
+        if (window.lucide) lucide.createIcons();
+    }
+</script>
+{% endblock %}

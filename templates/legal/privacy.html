@@ -1,0 +1,73 @@
+{% extends "legal/base.html" %}
+
+{% block legal_title %}Privacy Policy{% endblock %}
+{% block breadcrumb_title %}Privacy Policy{% endblock %}
+{% block legal_heading %}Privacy Policy{% endblock %}
+{% block legal_description %}
+How {{ site_settings.name|default:"Avingine" }} protects your account information, ledger records, and transaction data.
+{% endblock %}
+
+{% block legal_content %}
+<div class="space-y-10 text-slate-700 text-sm sm:text-[15px] leading-relaxed">
+    
+    <!-- Commitment Banner -->
+    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 flex items-start gap-3">
+        <i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0 text-[#00D084] mt-0.5"></i>
+        <div class="text-xs sm:text-sm">
+            <strong class="font-semibold text-[#101820]">Data Protection:</strong>
+            We do not sell or rent personal information to external marketers. All ledger entries, identity records, and financial communications are encrypted.
+        </div>
+    </div>
+
+    <!-- Section 1 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">1.0</span>
+            <span>Information We Collect</span>
+        </h2>
+        <p>
+            When you register, play, or transact on {{ site_settings.name|default:"Avingine" }}, we collect:
+        </p>
+        <div class="space-y-2.5">
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                <h3 class="text-[#101820] text-xs font-bold uppercase tracking-wider mb-1">Account Credentials</h3>
+                <p class="text-xs text-slate-600">Email address, system-generated username, and mobile payment telephone number.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                <h3 class="text-[#101820] text-xs font-bold uppercase tracking-wider mb-1">Financial & Ledger Data</h3>
+                <p class="text-xs text-slate-600">Deposit receipts, payment reference codes (e.g. M-Pesa transaction IDs), round stakes, and cashout history.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
+                <h3 class="text-[#101820] text-xs font-bold uppercase tracking-wider mb-1">Security & Session Data</h3>
+                <p class="text-xs text-slate-600">IP address, browser type, device information, and login timestamps to prevent unauthorized access.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">2.0</span>
+            <span>How We Use Your Data</span>
+        </h2>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li>To operate the game, credit deposits, and process instant mobile money payouts.</li>
+            <li>To verify player age (18+) and enforce responsible gaming limits.</li>
+            <li>To detect and prevent fraudulent account creation, syndicate abuse, or bot automation.</li>
+            <li>To provide verification codes for password reset and account security.</li>
+        </ul>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">3.0</span>
+            <span>Your Rights</span>
+        </h2>
+        <p>
+            You have the right to review the personal data associated with your account, correct any inaccuracies, or request account closure. For privacy inquiries, please contact <a href="mailto:{{ site_settings.contact_email|default:'support@avingine.com' }}" class="text-[#101820] font-semibold underline hover:text-[#00D084]">{{ site_settings.contact_email|default:'support@avingine.com' }}</a>.
+        </p>
+    </section>
+
+</div>
+{% endblock %}

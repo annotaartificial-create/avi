@@ -1,0 +1,70 @@
+{% extends "legal/base.html" %}
+
+{% block legal_title %}Game Rules{% endblock %}
+{% block breadcrumb_title %}Game Rules{% endblock %}
+{% block legal_heading %}Game & Multiplier Rules{% endblock %}
+{% block legal_description %}
+How the flight multiplier curve works, cashout mechanics, provable fairness verification, and round settlement.
+{% endblock %}
+
+{% block legal_content %}
+<div class="space-y-10 text-slate-700 text-sm sm:text-[15px] leading-relaxed">
+    
+    <!-- Principle Banner -->
+    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 flex items-start gap-3">
+        <i data-lucide="info" class="w-5 h-5 flex-shrink-0 text-[#00D084] mt-0.5"></i>
+        <div class="text-xs sm:text-sm">
+            <strong class="font-semibold text-[#101820]">How the Game Works:</strong>
+            At the start of each round, a multiplier begins at 1.00x and increases exponentially as the plane climbs. You must cash out before the plane flies away.
+        </div>
+    </div>
+
+    <!-- Section 1 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">1.0</span>
+            <span>Placing Bets & Cashout</span>
+        </h2>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li><strong>Betting Window:</strong> Bets must be placed during the 5-second countdown window before the round begins. Once the round starts, no further bets can be submitted for that flight.</li>
+            <li><strong>Multiplier Ascent:</strong> The multiplier coefficient starts at 1.00x and scales upward continuously as long as the flight is active.</li>
+            <li><strong>Manual Cashout:</strong> Pressing the Cash Out button locks in your multiplier at that exact millisecond. Winnings are calculated as: <code>Payout = Stake &times; Multiplier</code>.</li>
+            <li><strong>Auto-Cashout:</strong> You may pre-configure an auto-cashout target (e.g. 2.00x). If the flight reaches or surpasses that target, your bet will be cashed out automatically.</li>
+            <li><strong>Flight Departure (Crash):</strong> The plane can fly away at any moment. If the plane flies away before you cash out, the bet is lost.</li>
+        </ul>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">2.0</span>
+            <span>Provably Fair Verification (SHA-256)</span>
+        </h2>
+        <p>
+            {{ site_settings.name|default:"Avingine" }} utilizes a Provably Fair cryptographic system ensuring transparency:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li><strong>Server Seed:</strong> Generated securely on the server and hashed with SHA-256 before the round begins.</li>
+            <li><strong>Client Seeds:</strong> Derived from the first participating players' inputs for the round.</li>
+            <li><strong>Pre-determined Outcome:</strong> The flight crash multiplier is determined solely by the combined seeds before takeoff. Neither the player nor {{ site_settings.name|default:"Avingine" }} can alter the flight outcome once the round starts.</li>
+            <li><strong>Independent Verification:</strong> Any player can copy the round hash from their game history and verify the result using any third-party SHA-256 calculator.</li>
+        </ul>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">3.0</span>
+            <span>Disconnections & Technical Interruptions</span>
+        </h2>
+        <p>
+            If your internet connection drops while a bet is active:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li>If an <strong>Auto-Cashout</strong> target was active and the flight reaches it, your bet will be cashed out automatically and credited to your ledger.</li>
+            <li>If no Auto-Cashout was set, the bet will continue until the flight departure point; if you do not reconnect to click cash out in time, the bet settles according to the server's flight record.</li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

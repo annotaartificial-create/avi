@@ -1,0 +1,41 @@
+# Python Virtual Environments (Railway creates its own in container)
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Databases & Local state
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+
+# Static collected files (collected on Railway during deploy)
+staticfiles/
+
+# Media uploads in local development
+media/uploads/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

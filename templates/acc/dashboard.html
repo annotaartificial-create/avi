@@ -1,0 +1,45 @@
+{% extends "acc/base.html" %}
+
+{% block title %}Dashboard | {{ site_settings.name|default:"Avingine" }}{% endblock %}
+
+{% block auth_content %}
+<div class="w-full">
+    
+    <!-- Top Account Header -->
+    <div class="flex items-center justify-between pb-6 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#101820] text-[#00D084] flex items-center justify-center font-bold text-base shadow-sm">
+                {{ user.email|first|upper }}
+            </div>
+            <div>
+                <h2 class="text-base font-semibold text-[#101820]">{{ user.display_name }}</h2>
+                <p class="text-xs text-slate-400 font-medium">Logged in</p>
+            </div>
+        </div>
+
+        <a href="{% url 'acc:logout' %}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-300 hover:text-red-600 text-xs text-slate-600 transition-colors">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>Log out</span>
+        </a>
+    </div>
+
+    <!-- Account Details Table -->
+    <div class="mt-6 space-y-4">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2.5">
+            <div class="flex items-center justify-between text-sm py-1 border-b border-slate-200/60">
+                <span class="text-slate-500 text-xs">Email</span>
+                <span class="font-mono text-slate-800 text-xs font-medium">{{ user.email }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm py-1 border-b border-slate-200/60">
+                <span class="text-slate-500 text-xs">Username</span>
+                <span class="font-mono text-[#101820] font-semibold text-xs">@{{ user.username }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm py-1">
+                <span class="text-slate-500 text-xs">Joined</span>
+                <span class="text-slate-600 text-xs">{{ user.date_joined|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

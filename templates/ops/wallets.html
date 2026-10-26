@@ -1,0 +1,331 @@
+{% extends "ops/base.html" %}
+{% load humanize %}
+
+{% block title %}User Wallets{% endblock %}
+{% block header_title %}User Wallets & Balances{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Filters & Search -->
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            <!-- Search Form -->
+            <form method="get" class="flex-1 max-w-md relative">
+                <input type="hidden" name="filter" value="{{ status_filter }}">
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ query }}" 
+                        placeholder="Search wallet by email or username..." 
+                        class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-slate-900 bg-slate-50/50"
+                    >
+                    {% if query %}
+                        <a href="?filter={{ status_filter }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <div class="text-xs font-mono text-slate-500">
+                Wallets Listed: <strong class="text-slate-900">{{ total_count }}</strong>
+            </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-1.5 border-t border-slate-100 pt-3 overflow-x-auto text-xs">
+            <span class="text-slate-400 font-mono text-[11px] mr-2">Filter Balance:</span>
+            <a href="?filter=all{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if status_filter == 'all' %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                All Wallets
+            </a>
+            <a href="?filter=positive{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if status_filter == 'positive' %}bg-emerald-600 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                Positive Balance (> 0)
+            </a>
+            <a href="?filter=locked{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if status_filter == 'locked' %}bg-amber-600 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                With Locked Funds
+            </a>
+            <a href="?filter=zero{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if status_filter == 'zero' %}bg-slate-800 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                Zero Balance
+            </a>
+        </div>
+    </div>
+
+    <!-- Wallets Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 font-mono uppercase text-[10px]">
+                        <th class="p-3.5 pl-6">User Account</th>
+                        <th class="p-3.5 font-mono">Available Balance</th>
+                        <th class="p-3.5 font-mono">Real Balance</th>
+                        <th class="p-3.5 font-mono">Locked Balance</th>
+                        <th class="p-3.5">Status</th>
+                        <th class="p-3.5">Last Updated</th>
+                        <th class="p-3.5 pr-6 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-sans">
+                    {% for w in page_obj %}
+                        <tr class="hover:bg-slate-50/50 transition-colors" id="wallet-row-{{ w.id }}">
+                            <td class="p-3.5 pl-6">
+                                <div class="font-extrabold text-slate-900 flex items-center gap-2">
+                                    <span>{{ w.user.email }}</span>
+                                    {% if w.user.is_marketer %}
+                                        <span class="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-mono text-[9px] font-bold">MARKETER</span>
+                                    {% endif %}
+                                    {% if w.user.is_ops %}
+                                        <span class="px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 font-mono text-[9px] font-bold">OPS</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-[11px] text-slate-400 font-mono">
+                                    @{{ w.user.username }} • Wallet ID: #{{ w.id }}
+                                </div>
+                            </td>
+
+                            <td class="p-3.5 font-mono">
+                                <div class="text-sm font-black text-slate-900" id="w-avail-{{ w.id }}">{{ w.available_balance|floatformat:2|intcomma }} KES</div>
+                                <div class="text-[10px] text-slate-400">Usable for play/payout</div>
+                            </td>
+
+                            <td class="p-3.5 font-mono text-slate-700 font-bold" id="w-real-{{ w.id }}">
+                                {{ w.balance|floatformat:2|intcomma }} KES
+                            </td>
+
+                            <td class="p-3.5 font-mono">
+                                {% if w.locked_balance > 0 %}
+                                    <span class="font-bold text-amber-600" id="w-lock-{{ w.id }}">{{ w.locked_balance|floatformat:2|intcomma }} KES</span>
+                                {% else %}
+                                    <span class="text-slate-400" id="w-lock-{{ w.id }}">0.00 KES</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="p-3.5">
+                                {% if w.is_active %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold">
+                                        Frozen
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="p-3.5 font-mono text-slate-400 text-[11px]">
+                                {{ w.updated_at|date:"M d, H:i" }}
+                            </td>
+
+                            <td class="p-3.5 pr-6 text-right">
+                                <button 
+                                    type="button" 
+                                    onclick="openAdjustModal({{ w.id }}, '{{ w.user.email }}', '{{ w.balance }}', '{{ w.available_balance }}')" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                                >
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                    <span>Adjust Balance</span>
+                                </button>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-slate-400">
+                                No wallets matched your filter.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        {% if page_obj.has_other_pages %}
+            <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div>
+                    Page <span class="font-bold text-slate-900">{{ page_obj.number }}</span> of <span class="font-bold text-slate-900">{{ page_obj.paginator.num_pages }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}&filter={{ status_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Previous
+                        </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}&filter={{ status_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- MODAL: Adjust Wallet Balance -->
+<div id="adjust-wallet-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <i data-lucide="wallet" class="w-4 h-4"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Adjust Wallet Balance</h3>
+            </div>
+            <button type="button" onclick="closeAdjustModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs font-mono">
+            <div>User: <strong id="modal-wallet-user" class="text-slate-900"></strong></div>
+            <div>Current Real Balance: <strong id="modal-wallet-real" class="text-slate-900"></strong> KES</div>
+            <div>Current Available: <strong id="modal-wallet-avail" class="text-emerald-700"></strong> KES</div>
+        </div>
+
+        <form id="adjust-wallet-form" onsubmit="submitAdjustWallet(event)" class="space-y-4">
+            <input type="hidden" id="modal-wallet-id">
+
+            <!-- Adjustment Action Type -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Adjustment Action</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 has-checked:border-slate-900 has-checked:bg-slate-900 has-checked:text-white transition-all text-xs font-bold text-slate-700">
+                        <input type="radio" name="action_type" value="credit" class="sr-only" checked onchange="updateActionHelp()">
+                        <span>+ Credit</span>
+                        <span class="text-[10px] font-normal opacity-80">Add Funds</span>
+                    </label>
+                    <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 has-checked:border-slate-900 has-checked:bg-slate-900 has-checked:text-white transition-all text-xs font-bold text-slate-700">
+                        <input type="radio" name="action_type" value="debit" class="sr-only" onchange="updateActionHelp()">
+                        <span>- Debit</span>
+                        <span class="text-[10px] font-normal opacity-80">Deduct</span>
+                    </label>
+                    <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 has-checked:border-slate-900 has-checked:bg-slate-900 has-checked:text-white transition-all text-xs font-bold text-slate-700">
+                        <input type="radio" name="action_type" value="set" class="sr-only" onchange="updateActionHelp()">
+                        <span>Set Exact</span>
+                        <span class="text-[10px] font-normal opacity-80">Override</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Amount Input -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1" id="amount-input-label">Amount to Credit (KES)</label>
+                <input 
+                    type="number" 
+                    step="0.01" 
+                    min="0" 
+                    id="modal-wallet-amount" 
+                    required 
+                    placeholder="0.00" 
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-mono font-bold focus:outline-hidden focus:ring-2 focus:ring-slate-900"
+                >
+            </div>
+
+            <!-- Reason / Note -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Reason / Audit Trail Note</label>
+                <input 
+                    type="text" 
+                    id="modal-wallet-reason" 
+                    placeholder="e.g. Promotional grant, manual cash settlement, correction" 
+                    class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-slate-900"
+                >
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeAdjustModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer hover:bg-slate-200">
+                    Cancel
+                </button>
+                <button type="submit" id="modal-wallet-submit-btn" class="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold cursor-pointer hover:bg-slate-800 shadow-xs">
+                    Apply Adjustment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function updateActionHelp() {
+        const type = document.querySelector('input[name="action_type"]:checked').value;
+        const label = document.getElementById('amount-input-label');
+        if (type === 'credit') {
+            label.innerText = 'Amount to Add (Credit KES)';
+        } else if (type === 'debit') {
+            label.innerText = 'Amount to Deduct (Debit KES)';
+        } else {
+            label.innerText = 'Exact New Real Balance (KES)';
+        }
+    }
+
+    function openAdjustModal(id, email, realBal, availBal) {
+        document.getElementById('modal-wallet-id').value = id;
+        document.getElementById('modal-wallet-user').innerText = email;
+        document.getElementById('modal-wallet-real').innerText = parseFloat(realBal).toFixed(2);
+        document.getElementById('modal-wallet-avail').innerText = parseFloat(availBal).toFixed(2);
+        document.getElementById('modal-wallet-amount').value = '';
+        document.getElementById('modal-wallet-reason').value = '';
+        updateActionHelp();
+        document.getElementById('adjust-wallet-modal').classList.remove('hidden');
+    }
+
+    function closeAdjustModal() {
+        document.getElementById('adjust-wallet-modal').classList.add('hidden');
+    }
+
+    async function submitAdjustWallet(e) {
+        e.preventDefault();
+        const id = document.getElementById('modal-wallet-id').value;
+        const actionType = document.querySelector('input[name="action_type"]:checked').value;
+        const amount = document.getElementById('modal-wallet-amount').value;
+        const reason = document.getElementById('modal-wallet-reason').value;
+        const btn = document.getElementById('modal-wallet-submit-btn');
+
+        btn.disabled = true;
+        btn.innerText = 'Updating...';
+
+        try {
+            const res = await fetch(`/ops/wallets/${id}/adjust/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ action_type: actionType, amount: amount, reason: reason })
+            });
+
+            const data = await res.json();
+            btn.disabled = false;
+            btn.innerText = 'Apply Adjustment';
+
+            if (data.success) {
+                showToast(data.message, 'success');
+                closeAdjustModal();
+
+                // Update table numbers in real-time
+                const realEl = document.getElementById(`w-real-${id}`);
+                const availEl = document.getElementById(`w-avail-${id}`);
+                const lockEl = document.getElementById(`w-lock-${id}`);
+
+                if (realEl) realEl.innerText = `${data.balance.toFixed(2)} KES`;
+                if (availEl) availEl.innerText = `${data.available_balance.toFixed(2)} KES`;
+                if (lockEl) lockEl.innerText = `${data.locked_balance.toFixed(2)} KES`;
+            } else {
+                showToast(data.error || 'Failed to adjust balance', 'error');
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerText = 'Apply Adjustment';
+            showToast('Network error updating balance.', 'error');
+        }
+    }
+</script>
+{% endblock %}

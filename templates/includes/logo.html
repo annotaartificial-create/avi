@@ -1,0 +1,15 @@
+{% if site_settings.logo %}
+    <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.name|default:'Avingine' }}" class="h-8 w-auto max-h-8 object-contain">
+{% else %}
+    <!-- Default Vector Logo (Dark Navy & Green Sportsbook Brandmark) -->
+    <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-[#101820] border border-[#00D084]/20 text-[#00D084] flex items-center justify-center font-bold text-sm tracking-tight shadow-sm shadow-[#00D084]/10">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 19L12 4L20 19H15.5L12 11.5L8.5 19H4Z" fill="#00D084"/>
+            </svg>
+        </div>
+        <span class="font-extrabold text-[19px] tracking-[-0.03em] {{ logo_text_class|default:'text-[#101820] dark:text-white' }} font-sans">
+            {{ site_settings.name|default:"Avingine" }}
+        </span>
+    </div>
+{% endif %}

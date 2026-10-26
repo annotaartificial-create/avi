@@ -1,0 +1,572 @@
+{% extends "ops/base.html" %}
+
+{% block title %}Payments Ledger{% endblock %}
+{% block header_title %}Payments & Transactions Ledger{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Search & Filters Container -->
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            <!-- Search Form -->
+            <form method="get" class="flex-1 max-w-lg relative">
+                <input type="hidden" name="type" value="{{ tx_type }}">
+                <input type="hidden" name="status" value="{{ status_filter }}">
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ query }}" 
+                        placeholder="Search by reference, receipt, phone number, or email..." 
+                        class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-slate-900 bg-slate-50/50"
+                    >
+                    {% if query %}
+                        <a href="?type={{ tx_type }}&status={{ status_filter }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <div class="text-xs font-mono text-slate-500">
+                Transactions Found: <strong class="text-slate-900">{{ total_count }}</strong>
+            </div>
+        </div>
+
+        <!-- Filter Sub-bar: Type & Status -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs">
+            
+            <!-- Type Filters -->
+            <div class="flex items-center gap-1.5 overflow-x-auto">
+                <span class="text-slate-400 font-mono text-[11px] mr-1">Type:</span>
+                <a href="?type=ALL{% if query %}&q={{ query }}{% endif %}&status={{ status_filter }}" class="px-3 py-1 rounded-lg font-bold transition-colors {% if tx_type == 'ALL' %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    All
+                </a>
+                <a href="?type=DEPOSIT{% if query %}&q={{ query }}{% endif %}&status={{ status_filter }}" class="px-3 py-1 rounded-lg font-bold transition-colors {% if tx_type == 'DEPOSIT' %}bg-emerald-600 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    Deposits
+                </a>
+                <a href="?type=WITHDRAWAL{% if query %}&q={{ query }}{% endif %}&status={{ status_filter }}" class="px-3 py-1 rounded-lg font-bold transition-colors {% if tx_type == 'WITHDRAWAL' %}bg-slate-800 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    Withdrawals
+                </a>
+            </div>
+
+            <!-- Status Filters -->
+            <div class="flex items-center gap-1.5 overflow-x-auto">
+                <span class="text-slate-400 font-mono text-[11px] mr-1">Status:</span>
+                <a href="?status=ALL{% if query %}&q={{ query }}{% endif %}&type={{ tx_type }}" class="px-2.5 py-1 rounded-lg font-bold transition-colors {% if status_filter == 'ALL' %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    All
+                </a>
+                <a href="?status=PENDING{% if query %}&q={{ query }}{% endif %}&type={{ tx_type }}" class="px-2.5 py-1 rounded-lg font-bold transition-colors {% if status_filter == 'PENDING' %}bg-amber-600 text-white{% else %}text-amber-800 bg-amber-50 hover:bg-amber-100{% endif %}">
+                    Pending
+                </a>
+                <a href="?status=COMPLETED{% if query %}&q={{ query }}{% endif %}&type={{ tx_type }}" class="px-2.5 py-1 rounded-lg font-bold transition-colors {% if status_filter == 'COMPLETED' %}bg-emerald-600 text-white{% else %}text-emerald-800 bg-emerald-50 hover:bg-emerald-100{% endif %}">
+                    Completed
+                </a>
+                <a href="?status=FAILED{% if query %}&q={{ query }}{% endif %}&type={{ tx_type }}" class="px-2.5 py-1 rounded-lg font-bold transition-colors {% if status_filter == 'FAILED' %}bg-rose-600 text-white{% else %}text-rose-800 bg-rose-50 hover:bg-rose-100{% endif %}">
+                    Failed
+                </a>
+                <a href="?status=CANCELLED{% if query %}&q={{ query }}{% endif %}&type={{ tx_type }}" class="px-2.5 py-1 rounded-lg font-bold transition-colors {% if status_filter == 'CANCELLED' %}bg-rose-600 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                    Cancelled
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Unified Transactions Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 font-mono uppercase text-[10px]">
+                        <th class="p-3.5 pl-6">Reference & Type</th>
+                        <th class="p-3.5">User & Recipient</th>
+                        <th class="p-3.5 font-mono">Amount</th>
+                        <th class="p-3.5">Provider</th>
+                        <th class="p-3.5">Receipt / Ext Ref</th>
+                        <th class="p-3.5">Status</th>
+                        <th class="p-3.5">Date</th>
+                        <th class="p-3.5 pr-6 text-right">Ops Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-sans">
+                    {% for item in page_obj %}
+                        <tr class="hover:bg-slate-50/50 transition-colors" id="ledger-row-{{ item.id }}">
+                            <td class="p-3.5 pl-6">
+                                <div class="font-mono font-bold text-slate-900">{{ item.reference }}</div>
+                                <div class="pt-0.5">
+                                    {% if item.transaction_type == 'DEPOSIT' %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.2 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                                            <i data-lucide="arrow-down-left" class="w-3 h-3"></i> Deposit
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.2 rounded-full bg-slate-100 text-slate-800 text-[10px] font-bold">
+                                            <i data-lucide="arrow-up-right" class="w-3 h-3"></i> Withdrawal
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <td class="p-3.5">
+                                <div class="font-extrabold text-slate-900 flex items-center gap-1.5 truncate max-w-[170px]">
+                                    <span>{{ item.user.email }}</span>
+                                    {% if item.user.is_marketer %}
+                                        <span class="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-mono text-[9px] font-bold">MARKETER</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-[11px] text-slate-400 font-mono">
+                                    Phone: {{ item.phone|default:item.user.username }}
+                                </div>
+                            </td>
+
+                            <td class="p-3.5 font-mono font-black text-sm {% if item.transaction_type == 'DEPOSIT' %}text-emerald-600{% else %}text-slate-900{% endif %}">
+                                {% if item.transaction_type == 'DEPOSIT' %}+{% else %}-{% endif %}{{ item.amount|floatformat:2 }} KES
+                            </td>
+
+                            <td class="p-3.5">
+                                <span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 font-mono text-[10px] font-semibold">
+                                    {{ item.provider }}
+                                </span>
+                            </td>
+
+                            <td class="p-3.5 font-mono text-slate-600">
+                                {% if item.receipt_number %}
+                                    <span class="font-bold text-slate-800">{{ item.receipt_number }}</span>
+                                {% elif item.provider_reference %}
+                                    <span class="text-slate-500 text-[11px]">{{ item.provider_reference }}</span>
+                                {% else %}
+                                    <span class="text-slate-300">-</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="p-3.5" id="status-cell-{{ item.id }}">
+                                {% if item.status == 'COMPLETED' %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                                        COMPLETED
+                                    </span>
+                                {% elif item.status == 'PENDING' %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold animate-pulse">
+                                        PENDING
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">
+                                        {{ item.status }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="p-3.5 font-mono text-slate-400 text-[11px]">
+                                <div>{{ item.created_at|date:"M d, Y" }}</div>
+                                <div class="text-[10px] text-slate-300">{{ item.created_at|date:"H:i:s" }}</div>
+                            </td>
+
+                            <!-- Actions -->
+                            <td class="p-3.5 pr-6 text-right" id="action-cell-{{ item.id }}">
+                                {% if is_ops_staff %}
+                                    {% if item.transaction_type == 'DEPOSIT' and item.status == 'PENDING' %}
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button 
+                                                type="button" 
+                                                onclick="syncDepositRow({{ item.id }}, this)" 
+                                                class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                                                title="Check provider status via API"
+                                            >
+                                                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                                <span>Sync</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                onclick="openManualDepositPaidModal({{ item.id }}, '{{ item.reference }}', '{{ item.amount }}')" 
+                                                class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs cursor-pointer transition-colors"
+                                                title="Mark as paid manually"
+                                            >
+                                                <span>Mark Paid</span>
+                                            </button>
+                                        </div>
+
+                                    {% elif item.transaction_type == 'WITHDRAWAL' and item.status == 'PENDING' %}
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <button 
+                                                type="button" 
+                                                onclick="openApproveModal({{ item.id }}, '{{ item.reference }}', '{{ item.amount }}', '{{ item.phone }}')" 
+                                                class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                                            >
+                                                <i data-lucide="check" class="w-3 h-3"></i>
+                                                <span>Approve</span>
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                onclick="openRejectModal({{ item.id }}, '{{ item.reference }}', '{{ item.amount }}')" 
+                                                class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 font-bold text-xs cursor-pointer transition-colors"
+                                                title="Reject and refund wallet"
+                                            >
+                                                <i data-lucide="x" class="w-3 h-3"></i>
+                                            </button>
+                                        </div>
+
+                                    {% else %}
+                                        <span class="text-slate-300 font-mono text-[11px]">Processed</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-slate-300 font-mono text-[11px]">View only</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="p-8 text-center text-slate-400">
+                                No transactions matched your filter criteria.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div>
+                    Page <span class="font-bold text-slate-900">{{ page_obj.number }}</span> of <span class="font-bold text-slate-900">{{ page_obj.paginator.num_pages }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}&type={{ tx_type }}&status={{ status_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Previous
+                        </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}&type={{ tx_type }}&status={{ status_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- MODAL: Approve Withdrawal -->
+<div id="approve-withdrawal-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Approve & Mark Paid</h3>
+            </div>
+            <button type="button" onclick="closeApproveModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs font-mono">
+            <div>Ref: <strong id="approve-modal-ref" class="text-slate-900"></strong></div>
+            <div>Amount: <strong id="approve-modal-amount" class="text-slate-900 font-black"></strong> KES</div>
+            <div>Phone: <strong id="approve-modal-phone" class="text-slate-900"></strong></div>
+        </div>
+
+        <form id="approve-withdrawal-form" onsubmit="submitApproveWithdrawal(event)" class="space-y-3">
+            <input type="hidden" id="approve-modal-id">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">M-Pesa Receipt Code (Optional)</label>
+                <input type="text" id="approve-modal-receipt" placeholder="e.g. SJE78XXXXX (Auto-generated if empty)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Verification Note</label>
+                <input type="text" id="approve-modal-reason" placeholder="e.g. Verified via M-Pesa portal" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeApproveModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer hover:bg-slate-200">
+                    Cancel
+                </button>
+                <button type="submit" id="approve-modal-submit-btn" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer hover:bg-emerald-700 shadow-xs">
+                    Confirm Payout
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Reject Withdrawal -->
+<div id="reject-withdrawal-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Reject Withdrawal</h3>
+            </div>
+            <button type="button" onclick="closeRejectModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-rose-50 border border-rose-100 space-y-1 text-xs text-rose-800">
+            <p class="font-bold">Important Notice:</p>
+            <p>Rejecting will refund <strong id="reject-modal-amount"></strong> KES back into the user's available balance.</p>
+        </div>
+
+        <form id="reject-withdrawal-form" onsubmit="submitRejectWithdrawal(event)" class="space-y-3">
+            <input type="hidden" id="reject-modal-id">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Reason for Rejection (Required)</label>
+                <textarea id="reject-modal-reason" required rows="3" placeholder="e.g. Account name mismatch, duplicate submission" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-rose-500"></textarea>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeRejectModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer hover:bg-slate-200">
+                    Cancel
+                </button>
+                <button type="submit" id="reject-modal-submit-btn" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold cursor-pointer hover:bg-rose-700 shadow-xs">
+                    Reject & Refund Wallet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Manual Deposit Paid -->
+<div id="manual-deposit-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <i data-lucide="check-check" class="w-4 h-4"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Mark Deposit as Paid</h3>
+            </div>
+            <button type="button" onclick="closeManualDepositModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 space-y-1 text-xs text-emerald-800">
+            <p>Ref: <strong id="manual-dep-ref"></strong></p>
+            <p>Will credit: <strong id="manual-dep-amount"></strong> KES to user's wallet.</p>
+        </div>
+
+        <form id="manual-deposit-form" onsubmit="submitManualDeposit(event)" class="space-y-3">
+            <input type="hidden" id="manual-dep-id">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Receipt Number / Transaction Code</label>
+                <input type="text" id="manual-dep-receipt" placeholder="e.g. SJE827XXXX" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-mono focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Verification Note</label>
+                <input type="text" id="manual-dep-reason" placeholder="e.g. Verified payment statement" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeManualDepositModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold cursor-pointer hover:bg-slate-200">
+                    Cancel
+                </button>
+                <button type="submit" id="manual-dep-submit-btn" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer hover:bg-emerald-700 shadow-xs">
+                    Confirm & Credit Wallet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // APPROVE WITHDRAWAL
+    function openApproveModal(id, ref, amount, phone) {
+        document.getElementById('approve-modal-id').value = id;
+        document.getElementById('approve-modal-ref').innerText = ref;
+        document.getElementById('approve-modal-amount').innerText = parseFloat(amount).toFixed(2);
+        document.getElementById('approve-modal-phone').innerText = phone;
+        document.getElementById('approve-withdrawal-modal').classList.remove('hidden');
+    }
+    function closeApproveModal() {
+        document.getElementById('approve-withdrawal-modal').classList.add('hidden');
+    }
+    async function submitApproveWithdrawal(e) {
+        e.preventDefault();
+        const id = document.getElementById('approve-modal-id').value;
+        const receipt = document.getElementById('approve-modal-receipt').value.trim();
+        const reason = document.getElementById('approve-modal-reason').value.trim();
+        const btn = document.getElementById('approve-modal-submit-btn');
+        btn.disabled = true;
+        btn.innerText = 'Processing...';
+
+        try {
+            const res = await fetch(`/ops/payments/${id}/withdrawal-action/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ action: 'approve', receipt_number: receipt, reason: reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message, 'success');
+                closeApproveModal();
+                updateRowStatus(id, 'COMPLETED', data.receipt_number);
+            } else {
+                showToast(data.error || 'Failed to approve withdrawal', 'error');
+                btn.disabled = false;
+                btn.innerText = 'Confirm Payout';
+            }
+        } catch (err) {
+            showToast('Network error processing request.', 'error');
+            btn.disabled = false;
+            btn.innerText = 'Confirm Payout';
+        }
+    }
+
+    // REJECT WITHDRAWAL
+    function openRejectModal(id, ref, amount) {
+        document.getElementById('reject-modal-id').value = id;
+        document.getElementById('reject-modal-amount').innerText = parseFloat(amount).toFixed(2);
+        document.getElementById('reject-withdrawal-modal').classList.remove('hidden');
+    }
+    function closeRejectModal() {
+        document.getElementById('reject-withdrawal-modal').classList.add('hidden');
+    }
+    async function submitRejectWithdrawal(e) {
+        e.preventDefault();
+        const id = document.getElementById('reject-modal-id').value;
+        const reason = document.getElementById('reject-modal-reason').value.trim();
+        const btn = document.getElementById('reject-modal-submit-btn');
+        btn.disabled = true;
+        btn.innerText = 'Refunding...';
+
+        try {
+            const res = await fetch(`/ops/payments/${id}/withdrawal-action/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ action: 'reject', reason: reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message, 'success');
+                closeRejectModal();
+                updateRowStatus(id, 'CANCELLED');
+            } else {
+                showToast(data.error || 'Failed to reject withdrawal', 'error');
+                btn.disabled = false;
+                btn.innerText = 'Reject & Refund Wallet';
+            }
+        } catch (err) {
+            showToast('Network error processing request.', 'error');
+            btn.disabled = false;
+            btn.innerText = 'Reject & Refund Wallet';
+        }
+    }
+
+    // SYNC DEPOSIT
+    async function syncDepositRow(id, btn) {
+        const origHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i><span>...</span>`;
+        if (window.lucide) lucide.createIcons();
+
+        try {
+            const res = await fetch(`/ops/payments/${id}/sync-deposit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message, data.status === 'COMPLETED' ? 'success' : 'info');
+                if (data.status === 'COMPLETED') {
+                    updateRowStatus(id, 'COMPLETED', data.receipt_number);
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                    if (window.lucide) lucide.createIcons();
+                }
+            } else {
+                showToast(data.error || 'Sync failed', 'error');
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+                if (window.lucide) lucide.createIcons();
+            }
+        } catch (err) {
+            showToast('Network error syncing transaction', 'error');
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+            if (window.lucide) lucide.createIcons();
+        }
+    }
+
+    // MANUAL DEPOSIT PAID
+    function openManualDepositPaidModal(id, ref, amount) {
+        document.getElementById('manual-dep-id').value = id;
+        document.getElementById('manual-dep-ref').innerText = ref;
+        document.getElementById('manual-dep-amount').innerText = parseFloat(amount).toFixed(2);
+        document.getElementById('manual-deposit-modal').classList.remove('hidden');
+    }
+    function closeManualDepositModal() {
+        document.getElementById('manual-deposit-modal').classList.add('hidden');
+    }
+    async function submitManualDeposit(e) {
+        e.preventDefault();
+        const id = document.getElementById('manual-dep-id').value;
+        const receipt = document.getElementById('manual-dep-receipt').value.trim();
+        const reason = document.getElementById('manual-dep-reason').value.trim();
+        const btn = document.getElementById('manual-dep-submit-btn');
+        btn.disabled = true;
+        btn.innerText = 'Crediting...';
+
+        try {
+            const res = await fetch(`/ops/payments/${id}/mark-deposit-paid/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ receipt_number: receipt, reason: reason })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message, 'success');
+                closeManualDepositModal();
+                updateRowStatus(id, 'COMPLETED', data.receipt_number);
+            } else {
+                showToast(data.error || 'Failed to complete deposit', 'error');
+                btn.disabled = false;
+                btn.innerText = 'Confirm & Credit Wallet';
+            }
+        } catch (err) {
+            showToast('Network error processing request.', 'error');
+            btn.disabled = false;
+            btn.innerText = 'Confirm & Credit Wallet';
+        }
+    }
+
+    function updateRowStatus(id, status, receipt = '') {
+        const statusCell = document.getElementById(`status-cell-${id}`);
+        const actionCell = document.getElementById(`action-cell-${id}`);
+        if (statusCell) {
+            if (status === 'COMPLETED') {
+                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">COMPLETED</span>`;
+            } else if (status === 'CANCELLED') {
+                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">CANCELLED</span>`;
+            }
+        }
+        if (actionCell) {
+            actionCell.innerHTML = `<span class="text-slate-300 font-mono text-[11px]">Processed</span>`;
+        }
+    }
+</script>
+{% endblock %}

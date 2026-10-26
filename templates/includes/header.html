@@ -1,0 +1,73 @@
+<!-- Minimal, Premium Light Navigation Header Blending Seamlessly with Hero -->
+<header class="sticky top-0 z-40 w-full bg-white transition-all duration-200">
+    <div class="max-w-7xl mx-auto px-6 sm:px-8">
+        <div class="flex items-center justify-between h-10 md:h-14 lg:h-16">
+            
+            <!-- Left: Brand Logo -->
+            <a href="{% url 'main:landing' %}" class="flex items-center group transition-opacity hover:opacity-90 py-2" aria-label="Avingine Homepage">
+                {% include "includes/logo.html" with logo_text_class="text-[#101820]" %}
+            </a>
+
+            <!-- Center Navigation (Desktop Only) -->
+            <nav class="hidden md:flex items-center gap-9" aria-label="Main Navigation">
+                <a href="{% url 'main:landing' %}#how-it-works" class="text-[15px] font-medium text-slate-600 hover:text-[#101820] transition-colors">
+                    How to play
+                </a>
+                <a href="{% url 'main:landing' %}#fairness" class="text-[15px] font-medium text-slate-600 hover:text-[#101820] transition-colors">
+                    Fairness
+                </a>
+                <a href="{% url 'main:legal_rules' %}" class="text-[15px] font-medium text-slate-600 hover:text-[#101820] transition-colors">
+                    Game rules
+                </a>
+                <a href="{% url 'main:legal_terms' %}" class="text-[15px] font-medium text-slate-600 hover:text-[#101820] transition-colors">
+                    Legal
+                </a>
+            </nav>
+
+            <!-- Right: Desktop Actions & Phone-Only Menu Opener -->
+            <div class="flex items-center gap-4">
+                
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'engine:game' %}" class="hidden md:flex h-11 px-5 rounded-xl font-bold text-[14px] text-[#101820] bg-[#00D084] hover:bg-[#00b875] transition-all duration-150 shadow-sm items-center justify-center gap-1.5">
+                        <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                        <span>Play now</span>
+                    </a>
+                    <a href="{% url 'acc:dashboard' %}" class="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl text-[14px] font-semibold text-slate-700 hover:text-[#101820] transition-colors">
+                        <i data-lucide="user" class="w-4 h-4 text-[#00D084]"></i>
+                        <span>{{ request.user.display_name|truncatechars:16 }}</span>
+                    </a>
+                {% else %}
+                    <!-- Sign in (Large screens only) -->
+                    <a href="{% url 'acc:login' %}" class="hidden md:flex items-center px-4 py-2.5 rounded-xl text-[14px] font-semibold text-[#101820] hover:text-[#00D084] transition-colors">
+                        Sign in
+                    </a>
+
+                    <!-- Play now CTA (Large screens only; on phones it is in the sidebar) -->
+                    <a href="{% url 'engine:game' %}" class="hidden md:flex h-12 px-6 rounded-xl font-bold text-[14px] text-[#101820] bg-[#00D084] hover:bg-[#00b875] transition-all duration-150 shadow-sm active:scale-98 items-center justify-center">
+                        Play now
+                    </a>
+                {% endif %}
+
+                <!-- Menu Icon (Phones only, no word 'menu') -->
+                <button 
+                    type="button" 
+                    onclick="openAppSidebar()" 
+                    id="sidebar-opener-btn"
+                    class="flex md:hidden items-center justify-center w-11 h-11 rounded-xl hover:bg-slate-100 transition-colors text-[#101820] cursor-pointer"
+                    aria-label="Open menu"
+                >
+                    <div class="w-5 h-3.5 flex flex-col justify-between" aria-hidden="true">
+                        <span class="w-full h-0.5 bg-[#101820] rounded-full"></span>
+                        <span class="w-full h-0.5 bg-[#101820] rounded-full"></span>
+                        <span class="w-full h-0.5 bg-[#101820] rounded-full"></span>
+                    </div>
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</header>
+
+<!-- Global Slide-Over Sidebar Drawer -->
+{% include "includes/sidebar.html" %}

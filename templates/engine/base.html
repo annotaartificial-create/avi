@@ -1,0 +1,1248 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en" class="h-full light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{{ site_settings.name|default:"Avingine" }} | Cockpit{% endblock %}</title>
+
+    <!-- Favicon -->
+    {% if site_settings.favicon %}
+        <link rel="icon" href="{{ site_settings.favicon.url }}">
+    {% else %}
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><rect x='8' y='8' width='10' height='14' rx='2' fill='%23ffffff' transform='rotate(-10 8 8)' fill-opacity='0.8'/><rect x='13' y='9' width='10' height='14' rx='2' fill='%23ffffff'/></svg>">
+    {% endif %}
+
+    <!-- Google Fonts: Inter & Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind CSS with Custom Sportsbook Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        aviator: {
+                            green: '#28a909',
+                            'green-hover': '#239508',
+                            red: '#ef4444',
+                            cyan: '#0284c7',
+                            yellow: '#f59e0b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f3f4f6;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Clean subtle scrollbars */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#f3f4f6] text-slate-900 flex flex-col font-sans antialiased overflow-x-hidden selection:bg-[#ef4444]/20 selection:text-slate-900">
+
+    <!-- ========================================================================= -->
+    <!-- TOP NAVIGATION BAR -->
+    <!-- Left: Sidebar Opener + Site Settings Logo | Right: Balance + Deposit CTA Button -->
+    <!-- ========================================================================= -->
+    <header class="sticky top-0 z-40 w-full bg-white border-b border-slate-200/90 shadow-2xs py-1.5 sm:py-2">
+        <div class="w-full px-3 sm:px-4 max-w-[1720px] mx-auto flex items-center justify-between min-h-[44px] sm:min-h-[48px]">
+            
+            <!-- Left: Sidebar Opener (Hamburger) + Site Settings Logo -->
+            <div class="flex items-center gap-0 sm:gap-0">
+                <!-- Sidebar Opener Hamburger (Placed before the logo) -->
+                <button 
+                    type="button" 
+                    onclick="openSidebar()" 
+                    class="w-9 h-9 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer active:scale-95"
+                    title="Open Menu"
+                    aria-label="Open menu"
+                >
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+
+                <!-- Site Settings Logo -->
+                <a href="{% url 'engine:game' %}" class="flex items-center gap-2 group transition-opacity active:scale-95" title="{{ site_settings.name|default:'Avingine' }}">
+                    {% if site_settings.logo %}
+                        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.name|default:'Avingine' }}" class="h-6 sm:h-7 w-auto max-h-8 object-contain">
+                    {% else %}
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
+                            <i data-lucide="plane" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <span class="font-extrabold text-[15px] sm:text-[17px] tracking-tight text-slate-900">
+                            {{ site_settings.name|default:"Avingine" }}
+                        </span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- Right: Balance + Deposit CTA Button -->
+            <div class="flex items-center gap-2.5 sm:gap-3.5">
+                
+                <!-- Account Balance (Clickable to open M-Pesa Deposit) -->
+                <div class="flex items-center cursor-pointer select-none active:opacity-80 transition-opacity px-1" onclick="openDemoDepositModal()" title="Deposit funds">
+                    <span class="font-extrabold text-[13.5px] sm:text-[15px] text-slate-900 tracking-tight font-sans">
+                        <span id="nav-user-balance">{% if request.user.is_authenticated %}{{ request.user.wallet.available_balance|default:request.user.balance|floatformat:2|intcomma }}{% else %}0.00{% endif %}</span> KES
+                    </span>
+                </div>
+
+                <!-- Deposit CTA Button (Full solid height, unconstricted) -->
+                <button 
+                    type="button" 
+                    onclick="openDemoDepositModal()" 
+                    class="h-9 sm:h-10 px-4 sm:px-4.5 rounded-xl font-extrabold text-xs sm:text-[13px] text-white bg-[#28a909] hover:bg-[#229907] transition-all shadow-sm active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                    title="Deposit funds"
+                >
+                    <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+                    <span>Deposit</span>
+                </button>
+
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- SLIDE-OVER SIDEBAR DRAWER (Light Mode Cockpit Menu) -->
+    <!-- ========================================================================= -->
+    <div id="sidebar-drawer-backdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden transition-opacity" onclick="closeSidebar()"></div>
+    <aside id="sidebar-drawer" class="fixed inset-y-0 left-0 z-50 w-full sm:w-88 sm:max-w-sm bg-white border-r border-slate-200 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between overflow-y-auto">
+        <div class="p-4 sm:p-5 space-y-4">
+            
+            <!-- Drawer Header: Brand Logo & Close Button -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <a href="{% url 'engine:game' %}" class="flex items-center gap-2 group transition-opacity" title="{{ site_settings.name|default:'Avingine' }}">
+                    {% if site_settings.logo %}
+                        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.name|default:'Avingine' }}" class="h-7 sm:h-8 w-auto max-h-8 object-contain">
+                    {% else %}
+                        <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-white shadow-xs">
+                            <i data-lucide="plane" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <span class="font-extrabold text-[17px] tracking-tight text-slate-900">
+                            {{ site_settings.name|default:"Avingine" }}
+                        </span>
+                    {% endif %}
+                </a>
+                <button type="button" onclick="closeSidebar()" class="w-8 h-8 rounded-full text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer" aria-label="Close menu">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- WALLET SECTION -->
+            <div class="space-y-1">
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-2 pt-1 pb-0.5">
+                    WALLET & PAYMENTS
+                </div>
+
+                <!-- Deposit -->
+                <a href="javascript:void(0)" onclick="closeSidebar(); openDemoDepositModal()" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-50 text-[#28a909] flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="arrow-down-circle" class="w-5 h-5 text-[#28a909]"></i>
+                        </div>
+                        <span class="text-[14px] font-bold text-slate-800">Deposit</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors"></i>
+                </a>
+
+                <!-- Withdraw -->
+                <a href="javascript:void(0)" onclick="closeSidebar(); openWithdrawalModal()" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="arrow-up-circle" class="w-5 h-5 text-slate-700"></i>
+                        </div>
+                        <span class="text-[14px] font-bold text-slate-800">Withdrawal</span>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors"></i>
+                </a>
+            </div>
+
+            <!-- SETTINGS & AUDIO -->
+            <div class="space-y-1">
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-2 pt-2 pb-0.5">
+                    AUDIO CONTROLS
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-pointer" onclick="toggleSound()">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="volume-2" id="sidebar-sound-icon" class="w-5 h-5 text-amber-600"></i>
+                        </div>
+                        <span class="text-[14px] font-bold text-slate-800">Sound & Propeller FX</span>
+                    </div>
+                    <div id="sidebar-sound-switch-bg" class="w-9 h-5 rounded-full bg-[#28a909] p-0.5 transition-colors duration-200 flex items-center">
+                        <div id="sidebar-sound-switch-dot" class="w-4 h-4 rounded-full bg-white shadow-sm transform translate-x-4 transition-transform duration-200"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCOUNT SECTION -->
+            <div class="space-y-1 border-t border-slate-100 pt-3">
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-2 pb-0.5">
+                    ACCOUNT
+                </div>
+
+                {% if request.user.is_authenticated %}
+                    <a href="{% url 'acc:dashboard' %}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-9 h-9 rounded-full bg-slate-900 text-white font-extrabold flex items-center justify-center text-sm uppercase flex-shrink-0">
+                                {{ request.user.username|slice:":1"|default:request.user.email|slice:":1"|upper }}
+                            </div>
+                            <div class="min-w-0 truncate text-left">
+                                <div class="text-[14px] font-bold text-slate-900 truncate">
+                                    {{ request.user.username }}
+                                </div>
+                                <div class="text-[12px] text-slate-400 truncate font-mono">
+                                    {{ request.user.email }}
+                                </div>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors"></i>
+                    </a>
+
+                    {% if request.user.is_ops or request.user.is_staff or request.user.is_superuser %}
+                        <a href="{% url 'ops:dashboard' %}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i>
+                                </div>
+                                <span class="text-[14px] font-bold text-slate-900">Ops Management</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 text-[10px] font-bold font-mono">PORTAL</span>
+                        </a>
+                    {% elif request.user.is_marketer %}
+                        <a href="{% url 'ops:marketer' %}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
+                                </div>
+                                <span class="text-[14px] font-bold text-slate-900">Marketer Deposits</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold font-mono">MARKETER</span>
+                        </a>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'acc:logout' %}" class="w-full">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-rose-50 transition-colors group text-left cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="log-out" class="w-5 h-5 text-rose-500"></i>
+                                </div>
+                                <span class="text-[14px] font-bold text-rose-600">Sign Out</span>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors"></i>
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'acc:login' %}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-[#28a909]/15 text-[#28a909] flex items-center justify-center flex-shrink-0">
+                                <i data-lucide="log-in" class="w-5 h-5 text-[#28a909]"></i>
+                            </div>
+                            <span class="text-[14px] font-bold text-slate-800">Sign In / Register</span>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- ========================================================================= -->
+    <!-- LIVE CHAT MODAL / DRAWER -->
+    <!-- ========================================================================= -->
+    <div id="chat-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-sm rounded-2xl flex flex-col h-[520px] shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-3.5 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="message-square" class="w-4 h-4 text-slate-700"></i>
+                    <h3 class="text-sm font-extrabold text-slate-900">Aviator Live Chat</h3>
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-50 text-[#008f5c] border border-emerald-200 font-bold">Online</span>
+                </div>
+                <button type="button" onclick="closeChatModal()" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div class="flex-1 p-3 overflow-y-auto space-y-2.5 text-xs bg-slate-50" id="chat-messages-stream">
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded-full bg-[#38bdf8] text-white font-bold flex items-center justify-center text-[10px] flex-shrink-0">K</div>
+                    <div class="bg-white rounded-xl p-2 max-w-[80%] border border-slate-200 shadow-2xs">
+                        <span class="font-bold text-sky-700 text-[11px] block">Kip_Trader</span>
+                        <span class="text-slate-700">Huge 18.9x flight just now! 🚀</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded-full bg-[#f59e0b] text-black font-bold flex items-center justify-center text-[10px] flex-shrink-0">M</div>
+                    <div class="bg-white rounded-xl p-2 max-w-[80%] border border-slate-200 shadow-2xs">
+                        <span class="font-bold text-amber-700 text-[11px] block">Mwangi_001</span>
+                        <span class="text-slate-700">Cashed out at 4.43x on Panel 1! +2,215 KES</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-[10px] flex-shrink-0">A</div>
+                    <div class="bg-white rounded-xl p-2 max-w-[80%] border border-slate-200 shadow-2xs">
+                        <span class="font-bold text-slate-800 text-[11px] block">Avingine_Bot</span>
+                        <span class="text-slate-500">Good luck pilots! Keep eye on your auto cashouts.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-2.5 border-t border-slate-100 bg-white">
+                <form onsubmit="handleSendChat(event)" class="flex items-center gap-1.5">
+                    <input 
+                        type="text" 
+                        id="chat-input-text" 
+                        placeholder="Say something to the room..." 
+                        class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-800"
+                    >
+                    <button type="submit" class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-black text-white flex items-center justify-center cursor-pointer shadow-xs">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- M-PESA STK PUSH DEPOSIT MODAL (Clean Light Theme) -->
+    <!-- ========================================================================= -->
+    <div id="deposit-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white border border-slate-200 max-w-sm w-full rounded-2xl p-5 space-y-4 shadow-2xl text-left relative overflow-hidden text-slate-900">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-[#008f5c] flex items-center justify-center font-extrabold text-xs">
+                        <i data-lucide="smartphone" class="w-4 h-4 text-[#008f5c]"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900 leading-tight">M-Pesa Deposit</h3>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDemoDepositModal()" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-800 flex items-center justify-center cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- STEP 1: Phone & Amount Input Form -->
+            <div id="deposit-form-step" class="space-y-3">
+                <!-- Phone Number -->
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">
+                        M-Pesa Phone Number
+                    </label>
+                    <div class="flex items-center rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 focus-within:border-[#28a909] focus-within:bg-white transition-all shadow-2xs">
+                        <span class="text-xs font-mono font-bold text-slate-400 pr-2 border-r border-slate-200">+254</span>
+                        <input 
+                            type="tel" 
+                            id="deposit-phone-input" 
+                            placeholder="7XXXXXXXX" 
+                            class="flex-1 bg-transparent border-0 pl-2 text-sm font-mono font-bold text-slate-900 focus:outline-none p-0"
+                            autocomplete="tel"
+                        >
+                    </div>
+                </div>
+
+                <!-- Deposit Amount -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                            Amount (KES)
+                        </label>
+                        <span class="text-[10px] font-mono text-slate-400">Min: {{ min_deposit_amount|floatformat:"-2" }} KES</span>
+                    </div>
+                    <div class="flex items-center rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 focus-within:border-[#28a909] focus-within:bg-white transition-all shadow-2xs">
+                        <span class="text-xs font-mono font-bold text-slate-400 pr-2">KES</span>
+                        <input 
+                            type="number" 
+                            id="deposit-amount-input" 
+                            value="{{ min_deposit_amount|floatformat:'-2' }}" 
+                            min="{{ min_deposit_amount|floatformat:'-2' }}" 
+                            max="{{ max_deposit_amount|floatformat:'-2' }}" 
+                            step="any" 
+                            class="flex-1 bg-transparent border-0 text-left font-mono font-extrabold text-base text-slate-900 focus:outline-none p-0"
+                        >
+                    </div>
+                </div>
+
+                <!-- Quick Amount Chips -->
+                <div class="grid grid-cols-3 gap-1.5 font-mono text-xs font-bold">
+                    <button type="button" onclick="setDepositAmount(100)" class="dep-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">100</button>
+                    <button type="button" onclick="setDepositAmount(250)" class="dep-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">250</button>
+                    <button type="button" onclick="setDepositAmount(500)" class="dep-chip py-1.5 rounded-lg {% if min_deposit_amount == 500 %}bg-white text-[#008f5c] border-2 border-[#28a909] font-extrabold{% else %}bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200{% endif %} transition-colors cursor-pointer">500</button>
+                    <button type="button" onclick="setDepositAmount(1000)" class="dep-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">1,000</button>
+                    <button type="button" onclick="setDepositAmount(2500)" class="dep-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">2,500</button>
+                    <button type="button" onclick="setDepositAmount(5000)" class="dep-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">5,000</button>
+                </div>
+
+                <!-- Error Message Banner -->
+                <div id="deposit-error-banner" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"></div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="button" 
+                    id="deposit-submit-btn" 
+                    onclick="handleDepositSubmit()" 
+                    class="w-full py-3 rounded-xl bg-[#28a909] hover:bg-[#229907] text-white font-extrabold text-sm transition-all shadow-md active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                >
+                    <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
+                    <span id="deposit-submit-btn-text">Deposit via M-Pesa</span>
+                </button>
+            </div>
+
+            <!-- STEP 2: Waiting for PIN State -->
+            <div id="deposit-waiting-step" class="hidden py-4 text-center space-y-3.5">
+                <div class="relative w-14 h-14 mx-auto flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-emerald-100 animate-ping opacity-75"></div>
+                    <div class="relative w-12 h-12 rounded-full bg-emerald-50 text-[#008f5c] flex items-center justify-center shadow-inner">
+                        <i data-lucide="smartphone" class="w-6 h-6 text-[#008f5c] animate-pulse"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <h4 class="text-base font-extrabold text-slate-900">STK Prompt Sent!</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                        Please check phone <strong id="deposit-target-phone" class="text-slate-900 font-mono"></strong> and enter M-Pesa PIN for <strong id="deposit-target-amount" class="text-[#008f5c] font-mono"></strong>.
+                    </p>
+                </div>
+
+                <!-- Timer -->
+                <div id="deposit-timer-wrapper" class="space-y-1 px-2">
+                    <div class="flex items-center justify-between text-[11px] font-mono font-bold text-slate-500">
+                        <span>Enter PIN</span>
+                        <span id="deposit-countdown-text" class="text-[#008f5c] font-extrabold">0:45</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div id="deposit-countdown-bar" class="bg-[#28a909] h-1.5 rounded-full transition-all duration-1000 ease-linear" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div id="deposit-waiting-banner" class="flex items-center justify-center gap-2 text-xs font-bold text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+                    <div id="deposit-waiting-spinner" class="w-3 h-3 border-2 border-[#28a909] border-t-transparent rounded-full animate-spin shrink-0"></div>
+                    <span id="deposit-waiting-status-text">Waiting for payment authorization...</span>
+                </div>
+
+                <div id="deposit-check-status-container" class="hidden space-y-2 pt-1">
+                    <button 
+                        type="button" 
+                        id="deposit-check-status-btn"
+                        onclick="checkDirectDepositStatus()"
+                        class="w-full py-2.5 rounded-xl bg-[#28a909] hover:bg-[#229907] text-white font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        <i data-lucide="refresh-cw" class="w-4 h-4" id="deposit-check-status-icon"></i>
+                        <span id="deposit-check-status-text">Check Status</span>
+                    </button>
+                </div>
+
+                <button type="button" onclick="resetDepositModal()" class="text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+                    Cancel and change phone number
+                </button>
+            </div>
+
+            <!-- STEP 3: Success Confirmation State -->
+            <div id="deposit-success-step" class="hidden py-4 text-center space-y-3">
+                <div class="w-12 h-12 mx-auto rounded-full bg-emerald-50 text-[#008f5c] flex items-center justify-center">
+                    <i data-lucide="check-circle-2" class="w-7 h-7 text-[#008f5c]"></i>
+                </div>
+                <div class="space-y-1">
+                    <h4 class="text-base font-extrabold text-slate-900">Deposit Confirmed!</h4>
+                    <div class="text-2xl font-mono font-black text-[#008f5c]" id="deposit-success-amount">+0.00 KES</div>
+                    <p class="text-xs text-slate-400 font-mono">Receipt: <strong id="deposit-success-receipt" class="text-slate-700"></strong></p>
+                </div>
+                <button type="button" onclick="closeDemoDepositModal()" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-extrabold text-xs cursor-pointer">
+                    Return to Flight Cockpit
+                </button>
+            </div>
+
+            <!-- STEP 4: Failed State -->
+            <div id="deposit-failed-step" class="hidden py-4 text-center space-y-3">
+                <div class="w-12 h-12 mx-auto rounded-full bg-rose-50 text-rose-500 flex items-center justify-center">
+                    <i data-lucide="alert-circle" class="w-7 h-7 text-rose-500"></i>
+                </div>
+                <div class="space-y-1">
+                    <h4 class="text-base font-extrabold text-slate-900">Payment Incomplete</h4>
+                    <p id="deposit-failed-reason" class="text-xs text-rose-600 font-medium max-w-xs mx-auto">Cancelled</p>
+                </div>
+                <button type="button" onclick="resetDepositModal()" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-extrabold text-xs cursor-pointer">
+                    Try Again
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- M-PESA WITHDRAWAL MODAL -->
+    <!-- ========================================================================= -->
+    <div id="withdrawal-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white border border-slate-200 max-w-sm w-full rounded-2xl p-5 space-y-4 shadow-2xl text-left relative overflow-hidden text-slate-900">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center font-extrabold text-xs">
+                        <i data-lucide="arrow-up-circle" class="w-4 h-4 text-slate-800"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900 leading-tight">M-Pesa Withdrawal</h3>
+                    </div>
+                </div>
+                <button type="button" onclick="closeWithdrawalModal()" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-800 flex items-center justify-center cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Current Available Wallet Balance Card -->
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">Available Balance</span>
+                    <span class="text-xs text-slate-400 font-medium">Funds in your wallet</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-base font-extrabold font-mono text-slate-900" id="withdrawal-modal-balance">
+                        {% if request.user.is_authenticated %}{{ request.user.wallet.available_balance|default:request.user.balance|floatformat:2|intcomma }}{% else %}0.00{% endif %}
+                    </span>
+                    <span class="text-xs font-bold text-slate-600">KES</span>
+                </div>
+            </div>
+
+            <!-- STEP 1: Phone & Amount Input Form -->
+            <div id="withdrawal-form-step" class="space-y-3">
+                <!-- Phone Number -->
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">
+                        M-Pesa Payout Number
+                    </label>
+                    <div class="flex items-center rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 focus-within:border-slate-800 focus-within:bg-white transition-all shadow-2xs">
+                        <span class="text-xs font-mono font-bold text-slate-400 pr-2 border-r border-slate-200">+254</span>
+                        <input 
+                            type="tel" 
+                            id="withdrawal-phone-input" 
+                            placeholder="7XXXXXXXX" 
+                            class="flex-1 bg-transparent border-0 pl-2 text-sm font-mono font-bold text-slate-900 focus:outline-none p-0"
+                            autocomplete="tel"
+                        >
+                    </div>
+                </div>
+
+                <!-- Withdrawal Amount -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                            Amount to Withdraw
+                        </label>
+                        <span class="text-[10px] font-mono text-slate-400">Min: 50 KES</span>
+                    </div>
+                    <div class="flex items-center rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 focus-within:border-slate-800 focus-within:bg-white transition-all shadow-2xs">
+                        <span class="text-xs font-mono font-bold text-slate-400 pr-2">KES</span>
+                        <input 
+                            type="number" 
+                            id="withdrawal-amount-input" 
+                            value="100" 
+                            min="50" 
+                            max="150000" 
+                            step="10" 
+                            class="flex-1 bg-transparent border-0 text-left font-mono font-extrabold text-base text-slate-900 focus:outline-none p-0"
+                        >
+                    </div>
+                </div>
+
+                <!-- Quick Amount Chips -->
+                <div class="grid grid-cols-3 gap-1.5 font-mono text-xs font-bold">
+                    <button type="button" onclick="setWithdrawalAmount(100)" class="wth-chip py-1.5 rounded-lg bg-white text-slate-900 border-2 border-slate-900 font-extrabold transition-colors cursor-pointer">100</button>
+                    <button type="button" onclick="setWithdrawalAmount(250)" class="wth-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">250</button>
+                    <button type="button" onclick="setWithdrawalAmount(500)" class="wth-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">500</button>
+                    <button type="button" onclick="setWithdrawalAmount(1000)" class="wth-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">1,000</button>
+                    <button type="button" onclick="setWithdrawalAmount(2500)" class="wth-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer">2,500</button>
+                    <button type="button" onclick="setWithdrawalMax()" class="wth-chip py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition-colors cursor-pointer">All (Max)</button>
+                </div>
+
+                <!-- Error Message Banner -->
+                <div id="withdrawal-error-banner" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"></div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="button" 
+                    id="withdrawal-submit-btn" 
+                    onclick="handleWithdrawalSubmit()" 
+                    class="w-full py-3 rounded-xl bg-slate-900 hover:bg-black text-white font-extrabold text-sm transition-all shadow-md active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                >
+                    <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
+                    <span id="withdrawal-submit-btn-text">Withdraw to M-Pesa</span>
+                </button>
+            </div>
+
+            <!-- STEP 2: Processing State -->
+            <div id="withdrawal-waiting-step" class="hidden py-6 text-center space-y-3.5">
+                <div class="relative w-14 h-14 mx-auto flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-slate-200 animate-ping opacity-75"></div>
+                    <div class="relative w-12 h-12 rounded-full bg-slate-100 text-slate-800 flex items-center justify-center shadow-inner">
+                        <i data-lucide="arrow-up-circle" class="w-6 h-6 text-slate-800 animate-pulse"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <h4 class="text-base font-extrabold text-slate-900">Processing Payout</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                        Please wait while your M-Pesa withdrawal is being processed...
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+                    <div class="w-3.5 h-3.5 border-2 border-slate-800 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                    <span>Communicating with M-Pesa network...</span>
+                </div>
+            </div>
+
+            <!-- STEP 3: Success Confirmation State -->
+            <div id="withdrawal-success-step" class="hidden py-4 text-center space-y-3">
+                <div class="w-12 h-12 mx-auto rounded-full bg-emerald-50 text-[#008f5c] flex items-center justify-center">
+                    <i data-lucide="check-circle-2" class="w-7 h-7 text-[#008f5c]"></i>
+                </div>
+                <div class="space-y-1">
+                    <h4 class="text-base font-extrabold text-slate-900" id="withdrawal-success-heading">Withdrawal Processed!</h4>
+                    <p class="text-xs text-slate-500" id="withdrawal-success-subtext">Processed successfully.</p>
+                    <div class="text-2xl font-mono font-black text-slate-900 pt-1" id="withdrawal-success-amount">-0.00 KES</div>
+                    <p class="text-xs text-slate-500 font-mono">Recipient: <strong id="withdrawal-success-phone" class="text-slate-900"></strong></p>
+                    <p class="text-xs text-slate-400 font-mono"><span id="withdrawal-success-ref-label">Receipt</span>: <strong id="withdrawal-success-receipt" class="text-slate-700"></strong></p>
+                </div>
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs space-y-1">
+                    <div class="flex justify-between text-slate-500">
+                        <span>New Wallet Balance:</span>
+                        <span class="font-bold text-slate-900 font-mono" id="withdrawal-success-new-balance">0.00 KES</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeWithdrawalModal()" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-extrabold text-xs cursor-pointer">
+                    Return to Flight Cockpit
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- PROVABLY FAIR VERIFICATION MODAL -->
+    <!-- ========================================================================= -->
+    <div id="fairness-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 max-w-lg w-full rounded-2xl p-5 space-y-4 shadow-2xl text-left text-slate-900">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+                    <span class="font-extrabold text-sm text-slate-900">Provably Fair Verification</span>
+                </div>
+                <button onclick="toggleFairnessModal()" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-600">
+                <div>
+                    <label class="text-slate-500 font-medium block mb-1">Server Seed SHA-256 Hash (Published Prior to Takeoff):</label>
+                    <div id="modal-server-hash" class="p-2.5 rounded-lg bg-slate-50 font-mono text-[11px] text-[#008f5c] break-all border border-slate-200 select-all">--</div>
+                </div>
+                <div>
+                    <label class="text-slate-500 font-medium block mb-1">Revealed Server Seed (Revealed After Crash):</label>
+                    <div id="modal-server-seed" class="p-2.5 rounded-lg bg-slate-50 font-mono text-[11px] text-slate-700 break-all border border-slate-200 select-all">Hidden until round completes</div>
+                </div>
+                <div>
+                    <label class="text-slate-500 font-medium block mb-1">Client Seed:</label>
+                    <div id="modal-client-seed" class="p-2.5 rounded-lg bg-slate-50 font-mono text-[11px] text-slate-700 break-all border border-slate-200 select-all">--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 w-full p-2 sm:p-3 max-w-[1720px] mx-auto">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Scripts & Lucide -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function formatCurrency(val) {
+            return Number(val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function toggleFairnessModal() {
+            const modal = document.getElementById('fairness-modal');
+            if (modal) modal.classList.toggle('hidden');
+        }
+
+        // Live Chat Modal handlers
+        function openChatModal() {
+            const m = document.getElementById('chat-modal');
+            if (m) m.classList.remove('hidden');
+        }
+
+        function closeChatModal() {
+            const m = document.getElementById('chat-modal');
+            if (m) m.classList.add('hidden');
+        }
+
+        function handleSendChat(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input-text');
+            if (!input || !input.value.trim()) return;
+            const msg = input.value.trim();
+            input.value = '';
+
+            const stream = document.getElementById('chat-messages-stream');
+            if (stream) {
+                const newRow = document.createElement('div');
+                newRow.className = "flex items-start gap-2";
+                newRow.innerHTML = `
+                    <div class="w-6 h-6 rounded-full bg-[#28a909] text-white font-bold flex items-center justify-center text-[10px] flex-shrink-0">You</div>
+                    <div class="bg-white rounded-xl p-2 max-w-[80%] border border-slate-200 shadow-2xs">
+                        <span class="font-bold text-[#28a909] text-[11px] block">You</span>
+                        <span class="text-slate-800">${msg}</span>
+                    </div>
+                `;
+                stream.appendChild(newRow);
+                stream.scrollTop = stream.scrollHeight;
+            }
+        }
+
+        // Sidebar Drawer handlers
+        function openSidebar() {
+            const drawer = document.getElementById('sidebar-drawer');
+            const backdrop = document.getElementById('sidebar-drawer-backdrop');
+            if (drawer) drawer.classList.remove('-translate-x-full');
+            if (backdrop) backdrop.classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeSidebar() {
+            const drawer = document.getElementById('sidebar-drawer');
+            const backdrop = document.getElementById('sidebar-drawer-backdrop');
+            if (drawer) drawer.classList.add('-translate-x-full');
+            if (backdrop) backdrop.classList.add('hidden');
+        }
+
+        // =========================================================================
+        // M-PESA DEPOSIT LOGIC
+        // =========================================================================
+        let currentDepositReference = null;
+        let depositPollInterval = null;
+        let depositCountdownTimer = null;
+        const DEPOSIT_COUNTDOWN_TOTAL = 45;
+        let depositRemainingSeconds = DEPOSIT_COUNTDOWN_TOTAL;
+
+        function openDemoDepositModal() {
+            const modal = document.getElementById('deposit-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                resetDepositModal();
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        function closeDemoDepositModal() {
+            const modal = document.getElementById('deposit-modal');
+            if (modal) modal.classList.add('hidden');
+            stopDepositPolling();
+            stopDepositCountdown();
+        }
+
+        function resetDepositModal() {
+            stopDepositPolling();
+            stopDepositCountdown();
+            currentDepositReference = null;
+
+            document.getElementById('deposit-form-step').classList.remove('hidden');
+            document.getElementById('deposit-waiting-step').classList.add('hidden');
+            document.getElementById('deposit-success-step').classList.add('hidden');
+            document.getElementById('deposit-failed-step').classList.add('hidden');
+            
+            const checkStatusContainer = document.getElementById('deposit-check-status-container');
+            if (checkStatusContainer) checkStatusContainer.classList.add('hidden');
+
+            const timerWrapper = document.getElementById('deposit-timer-wrapper');
+            if (timerWrapper) timerWrapper.classList.remove('hidden');
+
+            const spinner = document.getElementById('deposit-waiting-spinner');
+            if (spinner) spinner.classList.remove('hidden');
+
+            const statusText = document.getElementById('deposit-waiting-status-text');
+            if (statusText) statusText.innerText = 'Waiting for payment authorization...';
+
+            const errBanner = document.getElementById('deposit-error-banner');
+            if (errBanner) {
+                errBanner.classList.add('hidden');
+                errBanner.innerText = '';
+            }
+            const submitBtn = document.getElementById('deposit-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                document.getElementById('deposit-submit-btn-text').innerText = 'Deposit via M-Pesa';
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function setDepositAmount(amount) {
+            const input = document.getElementById('deposit-amount-input');
+            if (input) input.value = amount;
+            
+            document.querySelectorAll('.dep-chip').forEach(btn => {
+                if (btn.innerText.replace(/,/g, '') === String(amount)) {
+                    btn.className = "dep-chip py-1.5 rounded-lg bg-white text-[#008f5c] border-2 border-[#28a909] font-extrabold transition-colors cursor-pointer";
+                } else {
+                    btn.className = "dep-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer";
+                }
+            });
+        }
+
+        async function handleDepositSubmit() {
+            const phoneInput = document.getElementById('deposit-phone-input');
+            const amountInput = document.getElementById('deposit-amount-input');
+            const errBanner = document.getElementById('deposit-error-banner');
+            const submitBtn = document.getElementById('deposit-submit-btn');
+            const submitText = document.getElementById('deposit-submit-btn-text');
+
+            errBanner.classList.add('hidden');
+            const phone = phoneInput ? phoneInput.value.trim() : '';
+            const amount = amountInput ? parseFloat(amountInput.value) : 0;
+            const minDeposit = parseFloat('{{ min_deposit_amount|floatformat:"-2" }}') || 1;
+            const maxDeposit = parseFloat('{{ max_deposit_amount|floatformat:"-2" }}') || 150000;
+
+            if (!phone) {
+                errBanner.innerText = 'Please enter your M-Pesa phone number.';
+                errBanner.classList.remove('hidden');
+                return;
+            }
+            if (!amount || amount < minDeposit) {
+                errBanner.innerText = `Minimum deposit amount is ${minDeposit} KES.`;
+                errBanner.classList.remove('hidden');
+                return;
+            }
+            if (amount > maxDeposit) {
+                errBanner.innerText = `Maximum deposit amount is ${maxDeposit.toLocaleString()} KES.`;
+                errBanner.classList.remove('hidden');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitText.innerText = 'Initiating STK Push...';
+
+            try {
+                const res = await fetch('/payment/deposit/initiate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ phone: phone, amount: amount })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    currentDepositReference = data.reference;
+
+                    document.getElementById('deposit-form-step').classList.add('hidden');
+                    document.getElementById('deposit-waiting-step').classList.remove('hidden');
+                    document.getElementById('deposit-target-phone').innerText = phone;
+                    document.getElementById('deposit-target-amount').innerText = amount.toFixed(2) + ' KES';
+
+                    startDepositCountdownAndPolling(data.reference, amount);
+                } else {
+                    errBanner.innerText = data.error || 'Failed to initiate M-Pesa deposit.';
+                    errBanner.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitText.innerText = 'Deposit via M-Pesa';
+                }
+            } catch (err) {
+                errBanner.innerText = 'Network error initiating deposit. Please try again.';
+                errBanner.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitText.innerText = 'Deposit via M-Pesa';
+            }
+        }
+
+        function startDepositCountdownAndPolling(reference, amount) {
+            stopDepositPolling();
+            stopDepositCountdown();
+
+            depositRemainingSeconds = DEPOSIT_COUNTDOWN_TOTAL;
+            updateCountdownUI(depositRemainingSeconds);
+
+            depositPollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/payment/deposit/status/${encodeURIComponent(reference)}/`);
+                    const data = await res.json();
+
+                    if (data.status === 'COMPLETED') {
+                        stopDepositPolling();
+                        stopDepositCountdown();
+                        showDepositSuccess(data);
+                    } else if (data.status === 'FAILED') {
+                        stopDepositPolling();
+                        stopDepositCountdown();
+                        showDepositFailed(data.message || 'Payment was cancelled or rejected.');
+                    }
+                } catch (e) {}
+            }, 2500);
+
+            depositCountdownTimer = setInterval(() => {
+                depositRemainingSeconds--;
+                updateCountdownUI(depositRemainingSeconds);
+
+                if (depositRemainingSeconds <= 0) {
+                    stopDepositPolling();
+                    stopDepositCountdown();
+                    onDepositCountdownExpired();
+                }
+            }, 1000);
+        }
+
+        function updateCountdownUI(remaining) {
+            const countText = document.getElementById('deposit-countdown-text');
+            const countBar = document.getElementById('deposit-countdown-bar');
+
+            const mins = Math.floor(Math.max(0, remaining) / 60);
+            const secs = Math.max(0, remaining) % 60;
+            const formatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+            if (countText) countText.innerText = formatted;
+            if (countBar) {
+                const pct = Math.max(0, Math.min(100, (remaining / DEPOSIT_COUNTDOWN_TOTAL) * 100));
+                countBar.style.width = `${pct}%`;
+            }
+        }
+
+        function onDepositCountdownExpired() {
+            const checkStatusContainer = document.getElementById('deposit-check-status-container');
+            if (checkStatusContainer) checkStatusContainer.classList.remove('hidden');
+            const spinner = document.getElementById('deposit-waiting-spinner');
+            if (spinner) spinner.classList.add('hidden');
+            const statusText = document.getElementById('deposit-waiting-status-text');
+            if (statusText) statusText.innerText = 'Callback window ended. Click Check Status to verify with M-Pesa.';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        async function checkDirectDepositStatus() {
+            if (!currentDepositReference) return;
+            const btn = document.getElementById('deposit-check-status-btn');
+            const btnText = document.getElementById('deposit-check-status-text');
+            const btnIcon = document.getElementById('deposit-check-status-icon');
+            const statusText = document.getElementById('deposit-waiting-status-text');
+
+            if (btn) btn.disabled = true;
+            if (btnText) btnText.innerText = 'Checking with M-Pesa...';
+            if (btnIcon) btnIcon.classList.add('animate-spin');
+
+            try {
+                const res = await fetch(`/payment/deposit/check-status/${encodeURIComponent(currentDepositReference)}/`);
+                const data = await res.json();
+                if (data.status === 'COMPLETED') {
+                    showDepositSuccess(data);
+                } else if (data.status === 'FAILED') {
+                    showDepositFailed(data.message || 'Payment cancelled.');
+                } else {
+                    if (statusText) statusText.innerText = data.message || 'Still processing. Please wait a moment.';
+                }
+            } catch (err) {
+                if (statusText) statusText.innerText = 'Error checking status. Please try again.';
+            } finally {
+                if (btn) btn.disabled = false;
+                if (btnText) btnText.innerText = 'Check Status';
+                if (btnIcon) btnIcon.classList.remove('animate-spin');
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        function stopDepositPolling() {
+            if (depositPollInterval) {
+                clearInterval(depositPollInterval);
+                depositPollInterval = null;
+            }
+        }
+
+        function stopDepositCountdown() {
+            if (depositCountdownTimer) {
+                clearInterval(depositCountdownTimer);
+                depositCountdownTimer = null;
+            }
+        }
+
+        function showDepositSuccess(data) {
+            stopDepositPolling();
+            stopDepositCountdown();
+            document.getElementById('deposit-waiting-step').classList.add('hidden');
+            document.getElementById('deposit-success-step').classList.remove('hidden');
+            document.getElementById('deposit-success-amount').innerText = `+${parseFloat(data.amount).toFixed(2)} KES`;
+            document.getElementById('deposit-success-receipt').innerText = data.receipt || 'Confirmed';
+            const navBal = document.getElementById('nav-user-balance');
+            if (navBal) navBal.innerText = formatCurrency(data.balance);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function showDepositFailed(reason) {
+            stopDepositPolling();
+            stopDepositCountdown();
+            document.getElementById('deposit-waiting-step').classList.add('hidden');
+            document.getElementById('deposit-failed-step').classList.remove('hidden');
+            document.getElementById('deposit-failed-reason').innerText = reason;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // =========================================================================
+        // M-PESA WITHDRAWAL LOGIC
+        // =========================================================================
+        function openWithdrawalModal() {
+            {% if not request.user.is_authenticated %}
+            window.location.href = "{% url 'acc:login' %}?next={% url 'engine:game' %}";
+            return;
+            {% endif %}
+
+            const modal = document.getElementById('withdrawal-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                resetWithdrawalModal();
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        function closeWithdrawalModal() {
+            const modal = document.getElementById('withdrawal-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function resetWithdrawalModal() {
+            const formStep = document.getElementById('withdrawal-form-step');
+            const waitStep = document.getElementById('withdrawal-waiting-step');
+            const succStep = document.getElementById('withdrawal-success-step');
+            const errBanner = document.getElementById('withdrawal-error-banner');
+            const submitBtn = document.getElementById('withdrawal-submit-btn');
+            const submitText = document.getElementById('withdrawal-submit-btn-text');
+
+            if (formStep) formStep.classList.remove('hidden');
+            if (waitStep) waitStep.classList.add('hidden');
+            if (succStep) succStep.classList.add('hidden');
+            if (errBanner) {
+                errBanner.classList.add('hidden');
+                errBanner.innerText = '';
+            }
+            if (submitBtn) submitBtn.disabled = false;
+            if (submitText) submitText.innerText = 'Withdraw to M-Pesa';
+
+            // Sync current balance in modal from nav-user-balance
+            const navBal = document.getElementById('nav-user-balance');
+            const modalBal = document.getElementById('withdrawal-modal-balance');
+            if (navBal && modalBal) {
+                modalBal.innerText = navBal.innerText.trim();
+            }
+
+            setWithdrawalAmount(100);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function setWithdrawalAmount(amount) {
+            const input = document.getElementById('withdrawal-amount-input');
+            if (input) input.value = amount;
+
+            document.querySelectorAll('.wth-chip').forEach(btn => {
+                if (btn.innerText.replace(/,/g, '') === String(amount)) {
+                    btn.className = "wth-chip py-1.5 rounded-lg bg-white text-slate-900 border-2 border-slate-900 font-extrabold transition-colors cursor-pointer";
+                } else if (!btn.innerText.includes('Max')) {
+                    btn.className = "wth-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer";
+                }
+            });
+        }
+
+        function setWithdrawalMax() {
+            const navBal = document.getElementById('nav-user-balance');
+            const input = document.getElementById('withdrawal-amount-input');
+            if (navBal && input) {
+                const bal = parseFloat(navBal.innerText.replace(/,/g, '')) || 0;
+                input.value = Math.floor(bal);
+            }
+            document.querySelectorAll('.wth-chip').forEach(btn => {
+                if (btn.innerText.includes('Max')) {
+                    btn.className = "wth-chip py-1.5 rounded-lg bg-slate-900 text-white font-extrabold border-2 border-slate-900 transition-colors cursor-pointer";
+                } else {
+                    btn.className = "wth-chip py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer";
+                }
+            });
+        }
+
+        async function handleWithdrawalSubmit() {
+            const phoneInput = document.getElementById('withdrawal-phone-input');
+            const amountInput = document.getElementById('withdrawal-amount-input');
+            const errBanner = document.getElementById('withdrawal-error-banner');
+            const submitBtn = document.getElementById('withdrawal-submit-btn');
+            const submitText = document.getElementById('withdrawal-submit-btn-text');
+
+            if (errBanner) errBanner.classList.add('hidden');
+            const phone = phoneInput ? phoneInput.value.trim() : '';
+            const amount = amountInput ? parseFloat(amountInput.value) : 0;
+
+            if (!phone) {
+                if (errBanner) {
+                    errBanner.innerText = 'Please enter your M-Pesa phone number.';
+                    errBanner.classList.remove('hidden');
+                }
+                return;
+            }
+            if (!amount || amount < 50) {
+                if (errBanner) {
+                    errBanner.innerText = 'Minimum withdrawal amount is 50 KES.';
+                    errBanner.classList.remove('hidden');
+                }
+                return;
+            }
+
+            // Client check against current balance
+            const navBal = document.getElementById('nav-user-balance');
+            const currentBal = navBal ? (parseFloat(navBal.innerText.replace(/,/g, '')) || 0) : 0;
+            if (amount > currentBal) {
+                if (errBanner) {
+                    errBanner.innerText = `Insufficient wallet balance. You have ${currentBal.toFixed(2)} KES available.`;
+                    errBanner.classList.remove('hidden');
+                }
+                return;
+            }
+
+            if (submitBtn) submitBtn.disabled = true;
+            if (submitText) submitText.innerText = 'Processing Withdrawal...';
+
+            const formStep = document.getElementById('withdrawal-form-step');
+            const waitStep = document.getElementById('withdrawal-waiting-step');
+            if (formStep) formStep.classList.add('hidden');
+            if (waitStep) waitStep.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/payment/withdraw/initiate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ phone: phone, amount: amount })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    if (waitStep) waitStep.classList.add('hidden');
+                    const succStep = document.getElementById('withdrawal-success-step');
+                    if (succStep) succStep.classList.remove('hidden');
+
+                    const headingEl = document.getElementById('withdrawal-success-heading');
+                    const subtextEl = document.getElementById('withdrawal-success-subtext');
+                    const refLabelEl = document.getElementById('withdrawal-success-ref-label');
+                    const amtEl = document.getElementById('withdrawal-success-amount');
+                    const phoneEl = document.getElementById('withdrawal-success-phone');
+                    const rcptEl = document.getElementById('withdrawal-success-receipt');
+                    const newBalEl = document.getElementById('withdrawal-success-new-balance');
+
+                    if (data.status === 'PENDING') {
+                        if (headingEl) headingEl.innerText = 'Withdrawal Request Submitted!';
+                        if (subtextEl) subtextEl.innerText = 'Pending admin verification. Funds will be sent once reviewed.';
+                        if (refLabelEl) refLabelEl.innerText = 'Reference';
+                    } else {
+                        if (headingEl) headingEl.innerText = 'Withdrawal Processed!';
+                        if (subtextEl) subtextEl.innerText = 'M-Pesa payout sent successfully to your phone.';
+                        if (refLabelEl) refLabelEl.innerText = 'Receipt';
+                    }
+
+                    if (amtEl) amtEl.innerText = `-${formatCurrency(data.amount)} KES`;
+                    if (phoneEl) phoneEl.innerText = data.phone;
+                    if (rcptEl) rcptEl.innerText = data.receipt || data.reference;
+                    if (newBalEl) newBalEl.innerText = `${formatCurrency(data.balance)} KES`;
+
+                    // Update top nav balance immediately
+                    if (navBal) navBal.innerText = formatCurrency(data.balance);
+                    const modalBal = document.getElementById('withdrawal-modal-balance');
+                    if (modalBal) modalBal.innerText = formatCurrency(data.balance);
+
+                    if (window.lucide) lucide.createIcons();
+                } else {
+                    if (waitStep) waitStep.classList.add('hidden');
+                    if (formStep) formStep.classList.remove('hidden');
+                    if (errBanner) {
+                        errBanner.innerText = data.error || 'Failed to process withdrawal.';
+                        errBanner.classList.remove('hidden');
+                    }
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (submitText) submitText.innerText = 'Withdraw to M-Pesa';
+                }
+            } catch (err) {
+                if (waitStep) waitStep.classList.add('hidden');
+                if (formStep) formStep.classList.remove('hidden');
+                if (errBanner) {
+                    errBanner.innerText = 'Network error processing withdrawal. Please try again.';
+                    errBanner.classList.remove('hidden');
+                }
+                if (submitBtn) submitBtn.disabled = false;
+                if (submitText) submitText.innerText = 'Withdraw to M-Pesa';
+            }
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

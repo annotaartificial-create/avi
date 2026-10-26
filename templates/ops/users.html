@@ -1,0 +1,248 @@
+{% extends "ops/base.html" %}
+{% load humanize %}
+
+{% block title %}Users & Roles{% endblock %}
+{% block header_title %}User Accounts & Role Permissions{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Filters, Search & Role Tabs -->
+    <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            <!-- Search Form -->
+            <form method="get" class="flex-1 max-w-md relative">
+                <input type="hidden" name="role" value="{{ role_filter }}">
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input 
+                        type="text" 
+                        name="q" 
+                        value="{{ query }}" 
+                        placeholder="Search by email, username, or ID..." 
+                        class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-slate-900 bg-slate-50/50"
+                    >
+                    {% if query %}
+                        <a href="?role={{ role_filter }}" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <div class="text-xs font-mono text-slate-500">
+                Total Matches: <strong class="text-slate-900">{{ total_count }}</strong>
+            </div>
+        </div>
+
+        <!-- Role Filter Tabs -->
+        <div class="flex items-center gap-1.5 border-t border-slate-100 pt-3 overflow-x-auto text-xs">
+            <span class="text-slate-400 font-mono text-[11px] mr-2">Filter Role:</span>
+            <a href="?role=all{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if role_filter == 'all' %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                All Users
+            </a>
+            <a href="?role=marketer{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if role_filter == 'marketer' %}bg-emerald-600 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                Marketers
+            </a>
+            <a href="?role=ops{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if role_filter == 'ops' %}bg-blue-600 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                Ops Staff
+            </a>
+            <a href="?role=staff{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if role_filter == 'staff' %}bg-purple-600 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                Superuser / Staff
+            </a>
+            <a href="?role=regular{% if query %}&q={{ query }}{% endif %}" class="px-3 py-1.5 rounded-lg font-bold transition-colors {% if role_filter == 'regular' %}bg-slate-800 text-white{% else %}text-slate-600 hover:bg-slate-100{% endif %}">
+                Regular Players
+            </a>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/70 border-b border-slate-100 text-slate-400 font-mono uppercase text-[10px]">
+                        <th class="p-3.5 pl-6">ID & User</th>
+                        <th class="p-3.5">Wallet Balance</th>
+                        <th class="p-3.5">Marketer Role</th>
+                        <th class="p-3.5">Ops Admin Role</th>
+                        <th class="p-3.5">Account Status</th>
+                        <th class="p-3.5">Date Joined</th>
+                        <th class="p-3.5 pr-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-sans">
+                    {% for u in page_obj %}
+                        <tr class="hover:bg-slate-50/50 transition-colors" id="user-row-{{ u.id }}">
+                            <td class="p-3.5 pl-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                        {{ u.email|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div class="font-extrabold text-slate-900 flex items-center gap-1.5">
+                                            <span>{{ u.email }}</span>
+                                            {% if u.is_superuser %}
+                                                <span class="px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-mono text-[9px] font-bold">SUPERUSER</span>
+                                            {% elif u.is_staff %}
+                                                <span class="px-1.5 py-0.2 rounded bg-blue-100 text-blue-800 font-mono text-[9px] font-bold">STAFF</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-[11px] text-slate-400 font-mono">
+                                            @{{ u.username }} • ID: #{{ u.id }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="p-3.5 font-mono">
+                                <div class="font-bold text-slate-900">{{ u.wallet_instance.available_balance|floatformat:2|intcomma }} KES</div>
+                                {% if u.wallet_instance.locked_balance > 0 %}
+                                    <div class="text-[10px] text-amber-600 font-semibold">{{ u.wallet_instance.locked_balance|floatformat:2|intcomma }} locked</div>
+                                {% endif %}
+                            </td>
+
+                            <!-- Marketer Toggle -->
+                            <td class="p-3.5">
+                                <button 
+                                    type="button" 
+                                    onclick="toggleRole({{ u.id }}, 'is_marketer', this)"
+                                    id="btn-marketer-{{ u.id }}"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border cursor-pointer transition-all {% if u.is_marketer %}bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100{% else %}bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200{% endif %}"
+                                    title="Click to toggle Marketer status"
+                                >
+                                    <span class="w-2 h-2 rounded-full {% if u.is_marketer %}bg-emerald-500{% else %}bg-slate-400{% endif %}"></span>
+                                    <span>{% if u.is_marketer %}Marketer Active{% else %}Marketer Off{% endif %}</span>
+                                </button>
+                            </td>
+
+                            <!-- Ops Staff Toggle -->
+                            <td class="p-3.5">
+                                <button 
+                                    type="button" 
+                                    onclick="toggleRole({{ u.id }}, 'is_ops', this)"
+                                    id="btn-ops-{{ u.id }}"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border cursor-pointer transition-all {% if u.is_ops %}bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100{% else %}bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200{% endif %}"
+                                    title="Click to toggle Ops Staff status"
+                                >
+                                    <span class="w-2 h-2 rounded-full {% if u.is_ops %}bg-blue-500{% else %}bg-slate-400{% endif %}"></span>
+                                    <span>{% if u.is_ops %}Ops Staff Active{% else %}Ops Staff Off{% endif %}</span>
+                                </button>
+                            </td>
+
+                            <td class="p-3.5">
+                                {% if u.is_active %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                                        <i data-lucide="check" class="w-3 h-3"></i> Active
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold">
+                                        Disabled
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="p-3.5 font-mono text-slate-400 text-[11px]">
+                                {{ u.date_joined|date:"M d, Y" }}
+                            </td>
+
+                            <td class="p-3.5 pr-6 text-right">
+                                <a href="{% url 'ops:wallets' %}?q={{ u.email }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+                                    <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+                                    <span>Manage Wallet</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-slate-400">
+                                No users matched your search criteria.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        {% if page_obj.has_other_pages %}
+            <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <div>
+                    Page <span class="font-bold text-slate-900">{{ page_obj.number }}</span> of <span class="font-bold text-slate-900">{{ page_obj.paginator.num_pages }}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}&role={{ role_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Previous
+                        </a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}&role={{ role_filter }}" class="px-3 py-1.5 rounded-lg border border-slate-200 font-bold hover:bg-slate-50">
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    async function toggleRole(userId, role, btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+
+        try {
+            const res = await fetch(`/ops/users/${userId}/toggle-role/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ role: role })
+            });
+
+            const data = await res.json();
+            btn.disabled = false;
+            btn.style.opacity = '1';
+
+            if (data.success) {
+                showToast(data.message, 'success');
+
+                // Update Marketer button
+                if (role === 'is_marketer') {
+                    if (data.is_marketer) {
+                        btn.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border cursor-pointer transition-all bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100";
+                        btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Marketer Active</span>`;
+                    } else {
+                        btn.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border cursor-pointer transition-all bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200";
+                        btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span><span>Marketer Off</span>`;
+                    }
+                }
+
+                // Update Ops button
+                if (role === 'is_ops') {
+                    if (data.is_ops) {
+                        btn.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border cursor-pointer transition-all bg-blue-50 text-blue-700 border-blue-300 hover:bg-blue-100";
+                        btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500"></span><span>Ops Staff Active</span>`;
+                    } else {
+                        btn.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border cursor-pointer transition-all bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200";
+                        btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span><span>Ops Staff Off</span>`;
+                    }
+                }
+            } else {
+                showToast(data.error || 'Failed to update role', 'error');
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            showToast('Network error updating role.', 'error');
+        }
+    }
+</script>
+{% endblock %}

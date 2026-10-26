@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block html_class %}light{% endblock %}
+
+{% block body_class %}min-h-full bg-white text-slate-900 flex flex-col justify-between selection:bg-[#4f6bf7]/15 selection:text-[#4f6bf7] antialiased font-sans{% endblock %}
+
+{% block ambient_background %}{% endblock %}
+
+{% block toast_notifications %}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex flex-col justify-between px-6 sm:px-8 py-8 sm:py-10">
+
+    <!-- Minimal Header -->
+    <header class="w-full max-w-7xl mx-auto flex items-center justify-between z-10">
+        <a href="{% url 'main:landing' %}" class="inline-flex items-center group transition-opacity hover:opacity-90">
+            {% include "includes/logo.html" %}
+        </a>
+    </header>
+
+    <!-- Main Auth Content (Laying directly on page) -->
+    <main class="w-full max-w-[390px] mx-auto my-auto py-8 z-10">
+        {% if messages %}
+            <div class="mb-5 space-y-2">
+                {% for message in messages %}
+                    <div class="p-3.5 rounded-xl text-sm flex items-start gap-2.5 {% if message.tags == 'success' %}bg-emerald-50 border border-emerald-200 text-emerald-700{% elif message.tags == 'error' %}bg-red-50 border border-red-200 text-red-600{% else %}bg-slate-50 border border-slate-200 text-slate-700{% endif %}">
+                        <i data-lucide="{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}alert-circle{% else %}info{% endif %}" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+                        <p class="leading-snug">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block auth_content %}{% endblock %}
+    </main>
+
+    <!-- Refined Minimal Footer -->
+    <footer class="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-[13px] text-slate-400 gap-3 pt-6 border-t border-slate-100 z-10">
+        <p>&copy; {% now "Y" %} {{ site_settings.copyright_text|default:"Avingine Systems. All rights reserved." }}</p>
+        <div class="flex items-center gap-5 text-slate-400">
+            <a href="#" class="hover:text-slate-700 transition-colors">Privacy Policy</a>
+            <a href="#" class="hover:text-slate-700 transition-colors">Terms of Service</a>
+            <a href="#" class="hover:text-slate-700 transition-colors">Support</a>
+        </div>
+    </footer>
+
+</div>
+{% endblock %}
+
+{% load static %}
+<script src="{% static 'acc/js/auth.js' %}"></script>
+{% block extra_scripts %}{% endblock %}

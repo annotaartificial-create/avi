@@ -1,0 +1,54 @@
+{% extends "legal/base.html" %}
+
+{% block legal_title %}AML & KYC Policy{% endblock %}
+{% block breadcrumb_title %}AML & KYC{% endblock %}
+{% block legal_heading %}Anti-Money Laundering & KYC{% endblock %}
+{% block legal_description %}
+Identity verification standards and financial monitoring protocols implemented to keep player accounts secure.
+{% endblock %}
+
+{% block legal_content %}
+<div class="space-y-10 text-slate-700 text-sm sm:text-[15px] leading-relaxed">
+    
+    <!-- Compliance Banner -->
+    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 flex items-start gap-3">
+        <i data-lucide="shield-alert" class="w-5 h-5 flex-shrink-0 text-[#00D084] mt-0.5"></i>
+        <div class="text-xs sm:text-sm">
+            <strong class="font-semibold text-[#101820]">Compliance Standards:</strong>
+            {{ site_settings.name|default:"Avingine" }} adheres to applicable Anti-Money Laundering (AML) regulations to prevent illicit financial activities and protect user funds.
+        </div>
+    </div>
+
+    <!-- Section 1 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">1.0</span>
+            <span>Customer Due Diligence (KYC)</span>
+        </h2>
+        <p>
+            To verify player identities and adhere to statutory obligations:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li><strong>Phone & Email Verification:</strong> Every player must register with a valid email address and an active mobile phone number registered under their name.</li>
+            <li><strong>Identity Checks:</strong> Before processing high-volume withdrawal requests, we reserve the right to request proof of identity (e.g. valid national ID or passport) and proof of address.</li>
+            <li><strong>Single Origin Account:</strong> Deposits and withdrawals must be made using payment accounts (such as M-Pesa phone numbers) registered in the player’s own name.</li>
+        </ul>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="space-y-3">
+        <h2 class="text-xl font-bold text-[#101820] tracking-tight flex items-center gap-2">
+            <span class="text-[#00D084] font-mono text-base font-bold">2.0</span>
+            <span>Transaction Monitoring</span>
+        </h2>
+        <p>
+            All ledger transactions are audited by automated fraud detection systems:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 text-slate-600">
+            <li>Depositing funds and requesting immediate withdrawal without active gameplay triggers an anti-money laundering review.</li>
+            <li>Operating multiple accounts to circumvent deposit or betting limits is strictly prohibited and grounds for immediate closure.</li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

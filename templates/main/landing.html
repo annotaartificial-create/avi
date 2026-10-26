@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ site_settings.name|default:"Avingine" }} | The Crash Multiplier Game{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Watch the multiplier climb and cash out before the plane flies away. Avingine is an Aviator-style real-time crash multiplier game with instant mobile payouts.">
+{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex flex-col bg-white text-slate-900">
+
+    <!-- Minimal Premium Header -->
+    {% include "includes/header.html" %}
+
+    <main class="flex-1">
+        
+        <!-- ========================================================================= -->
+        <!-- HERO SECTION -->
+        <!-- ========================================================================= -->
+        <section class="max-w-7xl mx-auto px-6 sm:px-8 pt-6 pb-16 lg:pt-20 lg:pb-12">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                
+                <!-- Left: Content & CTAs (No badge) -->
+                <div class="lg:col-span-6 space-y-6 text-left">
+                    <!-- Recent Rounds Strip resting directly on page -->
+                    <div class="mt-4 flex flex-wrap items-center justify-start gap-2 text-xs text-slate-500">
+                        <div class="flex items-center gap-1.5 font-mono font-semibold">
+                            <span class="text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">1.34x</span>
+                            <span class="text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">4.18x</span>
+                            <span class="text-[#00D084] bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-lg">18.90x</span>
+                            <span class="text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">2.05x</span>
+                            <span class="text-[#00D084] bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-lg">52.40x</span>
+                        </div>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#101820] leading-[1.08] font-sans">
+                        Cash out before it flies away.
+                    </h1>
+
+                    <p class="text-slate-600 text-base sm:text-lg max-w-lg leading-relaxed">
+                        Place your stake, watch the multiplier soar in real time, and hit cash out before the flight departs. Fast, transparent, and provably fair.
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+                        <a href="{% url 'engine:game' %}" class="h-12 px-7 rounded-xl font-bold text-[15px] text-[#101820] bg-[#00D084] hover:bg-[#00b875] transition-all duration-150 flex items-center justify-center gap-2 shadow-sm active:scale-98">
+                            <span>Play now</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </a>
+                        <a href="{% url 'main:legal_rules' %}" class="h-12 px-6 rounded-xl font-medium text-[15px] text-[#101820] border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors flex items-center justify-center">
+                            Game rules
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right: Jet Illustration Resting Directly on Background (No Containers, No Badge) -->
+                <div class="lg:col-span-6 flex flex-col items-center lg:items-end">
+                    
+                    <!-- Plane Image resting directly on background -->
+                    <img 
+                        src="{% static 'images/hero.png' %}" 
+                        alt="Avingine Multiplier Flight Illustration" 
+                        class="w-full max-w-lg lg:max-w-none h-auto object-contain"
+                    >
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- HOW IT WORKS (3 Simple Steps) -->
+        <!-- ========================================================================= -->
+        <section id="how-it-works" class="border-t border-slate-100 py-20 bg-slate-50/60">
+            <div class="max-w-7xl mx-auto px-3 sm:px-8">
+                
+                <div class="max-w-xl text-left mb-14 space-y-2">
+                    <p class="text-3xl font-extrabold text-[#101820] tracking-tight">
+                        Simple rules. Instant decisions.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <!-- Step 1 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/70 space-y-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 text-[#101820] font-bold text-sm font-mono flex items-center justify-center">
+                            1
+                        </div>
+                        <h3 class="font-bold text-[#101820] text-base">Place your bet</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Choose your stake before the flight takes off. You can set an auto-cashout target or decide manually during the round.
+                        </p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/70 space-y-3">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 text-[#101820] font-bold text-sm font-mono flex items-center justify-center">
+                            2
+                        </div>
+                        <h3 class="font-bold text-[#101820] text-base">Watch the multiplier soar</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            The plane begins its ascent and the multiplier ticks up from 1.00x upward. The higher the flight, the bigger the payout.
+                        </p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/70 space-y-3">
+                        <div class="w-8 h-8 rounded-lg bg-[#00D084] text-[#101820] font-bold text-sm font-mono flex items-center justify-center">
+                            3
+                        </div>
+                        <h3 class="font-bold text-[#101820] text-base">Cash out before the crash</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Click cash out at any point to secure your winnings. If the plane flies away before you cash out, the round is lost.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- PROVABLY FAIR & PAYMENT RAILS -->
+        <!-- ========================================================================= -->
+        <section id="fairness" class="py-20 border-t border-slate-100 max-w-7xl mx-auto px-6 sm:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="p-8 rounded-2xl border border-slate-200 bg-white space-y-4 text-left">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-[#101820] flex items-center justify-center">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-[#00D084]"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-[#101820] tracking-tight">100% Provably Fair</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Every round outcome is generated cryptographically using combined server and client seeds before the round starts. Anyone can verify round results on the public ledger.
+                    </p>
+                    <a href="{% url 'main:legal_rules' %}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#101820] hover:text-[#00D084]">
+                        <span>Read technical verification rules</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+
+                <div class="p-8 rounded-2xl border border-slate-200 bg-white space-y-4 text-left">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-[#101820] flex items-center justify-center">
+                        <i data-lucide="zap" class="w-5 h-5 text-[#00D084]"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-[#101820] tracking-tight">Instant M-Pesa Withdrawals</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        No pending queues. Winnings are credited to your ledger immediately upon cashing out and can be withdrawn directly to your phone in seconds.
+                    </p>
+                    <a href="{% url 'main:legal_terms' %}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#101820] hover:text-[#00D084]">
+                        <span>View payment terms</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- CLEAN CALL TO ACTION -->
+        <!-- ========================================================================= -->
+        <section class="border-t border-slate-100 py-20 bg-slate-50/50">
+            <div class="max-w-4xl mx-auto px-6 sm:px-8 text-center space-y-6">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-[#101820] tracking-tight">
+                    Ready to take off?
+                </h2>
+                <p class="text-slate-600 text-base max-w-md mx-auto">
+                    Create an account in 30 seconds and start playing today.
+                </p>
+                <div>
+                    <a href="{% url 'acc:signup' %}" class="inline-flex items-center justify-center h-12 px-8 rounded-xl font-bold text-sm text-[#101820] bg-[#00D084] hover:bg-[#00b875] shadow-sm transition-all duration-150">
+                        Create account
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Minimal Premium Footer -->
+    {% include "includes/footer.html" %}
+
+</div>
+{% endblock %}

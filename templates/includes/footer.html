@@ -1,0 +1,71 @@
+<!-- Minimalist Premium Light Footer (Optimized for Mobile & Desktop) -->
+<footer class="w-full bg-white border-t border-slate-100 text-slate-500 font-sans">
+    <div class="max-w-7xl mx-auto px-6 sm:px-8 py-10 sm:py-12 space-y-8">
+        
+        <!-- Top Section: Brand Identity + Navigation Links -->
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-8">
+            
+            <!-- Brand & Mission Column (Left-aligned on mobile) -->
+            <div class="space-y-3 max-w-sm text-left">
+                <a href="{% url 'main:landing' %}" class="inline-flex items-center group transition-opacity hover:opacity-90">
+                    {% include "includes/logo.html" with logo_text_class="text-[#101820]" %}
+                </a>
+                <p class="text-xs sm:text-[13px] text-slate-500 leading-relaxed">
+                    Real-time crash multiplier gaming platform with instant settlements and provably fair cryptographic outcomes.
+                </p>
+                <div class="pt-1 flex items-center gap-2 text-xs">
+                    <span class="text-slate-400">Support:</span>
+                    <a href="mailto:{{ site_settings.contact_email|default:'support@avingine.com' }}" class="font-semibold text-[#101820] hover:text-[#00D084] transition-colors">
+                        {{ site_settings.contact_email|default:'support@avingine.com' }}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Links Column: Clean 2-column mobile grid, flex row on tablet/desktop -->
+            <div class="text-left">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 sm:hidden">
+                    Navigation & Policies
+                </div>
+                <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-start sm:items-center gap-x-8 gap-y-3.5 text-[13px] font-medium text-slate-600">
+                    <a href="{% url 'main:legal_rules' %}" class="hover:text-[#101820] transition-colors py-1">Game rules</a>
+                    <a href="{% url 'main:landing' %}#fairness" class="hover:text-[#101820] transition-colors py-1">Provably Fair</a>
+                    <a href="{% url 'main:legal_terms' %}" class="hover:text-[#101820] transition-colors py-1">Terms of Service</a>
+                    <a href="{% url 'main:legal_privacy' %}" class="hover:text-[#101820] transition-colors py-1">Privacy Policy</a>
+                    <a href="{% url 'main:legal_responsible_gaming' %}" class="hover:text-[#101820] transition-colors py-1">Responsible Gaming</a>
+                    <a href="{% url 'main:legal_aml' %}" class="hover:text-[#101820] transition-colors py-1">AML & KYC</a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Trust & Security Badges Strip (Left-aligned, wrapping cleanly on phone) -->
+        <div class="flex flex-wrap items-center gap-2.5 pt-4 border-t border-slate-100">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200">
+                <span>18+</span>
+                <span class="font-medium text-amber-700">Strictly 18+ Only</span>
+            </span>
+
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium text-emerald-800 bg-emerald-50 border border-emerald-200/70">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#00D084]"></span>
+                <span>SHA-256 Verified Fairness</span>
+            </span>
+
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-700 bg-slate-50 border border-slate-200">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[#00D084]"></i>
+                <span>256-Bit SSL Encrypted</span>
+            </span>
+        </div>
+
+        <!-- Regulatory Notice & Copyright Line (Left-aligned) -->
+        <div class="space-y-2.5 pt-1 text-left">
+            <p class="text-[11px] sm:text-[12px] text-slate-400 leading-relaxed max-w-4xl">
+                {{ site_settings.name|default:"Avingine" }} is a crash multiplier game. Gambling involves risk of financial loss and can be addictive. Please play responsibly and within your financial limits.
+            </p>
+            
+            <p class="text-xs text-slate-400">
+                &copy; {% now "Y" %} {{ site_settings.copyright_text|default:"Avingine Systems. All rights reserved." }}
+            </p>
+        </div>
+
+    </div>
+</footer>
