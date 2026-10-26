@@ -195,6 +195,44 @@ MAILERS = {
     },
 }
 
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} | {levelname:<8} | {name} | {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "app.log"),
+            "formatter": "verbose",
+            "encoding": "utf-8",
+        },
+    },
+
+    "root": {
+        "handlers": ["file"],
+        "level": "DEBUG",
+    },
+
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
+
+
 # ==============================================================================
 # PAYMENT PROVIDERS CONFIGURATION
 # ==============================================================================
