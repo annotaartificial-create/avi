@@ -44,6 +44,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "https://skymaxwin.site/",
+    "https://www.skymaxwin.site/",
 ]
 if os.getenv("RAILWAY_PUBLIC_DOMAIN"):
     CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN')}")
