@@ -45,6 +45,7 @@ CSRF_TRUSTED_ORIGINS = [
         "https://*.up.railway.app",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        "http://192.168.0.107:8000"
         "https://skymaxwin.site",
         "https://www.skymaxwin.site",
     ]
@@ -115,10 +116,13 @@ WSGI_APPLICATION = 'avi.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-import dj_database_url
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
 
 database_url = os.getenv("DATABASE_URL")
-if database_url:
+if database_url and dj_database_url:
     DATABASES = {
         'default': dj_database_url.config(
             default=database_url,
@@ -189,6 +193,11 @@ AUTH_USER_MODEL = 'acc.User'
 LOGIN_URL = 'acc:login'
 LOGIN_REDIRECT_URL = 'engine:game'
 LOGOUT_REDIRECT_URL = 'acc:login'
+
+# Session Persistence (30 days rolling session)
+SESSION_COOKIE_AGE = 2592000          # 30 days in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False # Persists when browser is closed
+SESSION_SAVE_EVERY_REQUEST = True     # Refreshes session cookie expiration on every activity
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration

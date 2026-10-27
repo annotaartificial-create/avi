@@ -73,6 +73,11 @@ class EngineService:
                         )
                         round_locked.save(update_fields=['status', 'crashed_at'])
                         EngineService._settle_crashed_round(round_locked)
+
+                        # If pause duration is 0, start the new round's countdown immediately!
+                        if config.crashed_pause_seconds == 0:
+                            return EngineService._create_new_round(config, now)
+
                 return GameRound.objects.get(id=latest_round.id)
             return latest_round
 
@@ -80,7 +85,7 @@ class EngineService:
         if latest_round.is_crashed:
             crashed_time = latest_round.crashed_at or latest_round.created_at
             pause_end = crashed_time + timedelta(seconds=config.crashed_pause_seconds)
-            if now >= pause_end:
+            if config.crashed_pause_seconds == 0 or now >= pause_end:
                 return EngineService._create_new_round(config, now)
             return latest_round
 

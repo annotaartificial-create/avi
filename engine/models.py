@@ -32,8 +32,8 @@ class GameConfig(models.Model):
     )
     crashed_pause_seconds = models.PositiveIntegerField(
         _('crashed pause (seconds)'),
-        default=3,
-        help_text=_('Duration showing crashed outcome before next round begins')
+        default=0,
+        help_text=_('Duration showing crashed outcome before next round begins (0 = immediate countdown)')
     )
     growth_rate_k = models.FloatField(
         _('flight growth coefficient (k)'),
@@ -86,7 +86,10 @@ class GameConfig(models.Model):
 
     @classmethod
     def load(cls):
-        obj, _ = cls.objects.get_or_create(pk=1)
+        obj, created = cls.objects.get_or_create(pk=1)
+        if not created and obj.crashed_pause_seconds == 3:
+            obj.crashed_pause_seconds = 0
+            obj.save(update_fields=['crashed_pause_seconds'])
         return obj
 
 

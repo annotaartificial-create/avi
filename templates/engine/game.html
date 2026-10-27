@@ -1152,12 +1152,16 @@
         playFlyAwaySound();
         userBets = [];
         updateButtonsState();
+
+        // Immediately trigger sync as soon as the plane zooms off-screen (~350ms)
+        // so the next round countdown starts immediately without delay
+        scheduleNextSync(350);
     }
 
     // State Synchronization
     function scheduleNextSync(delayMs) {
         if (stateTimeoutId) clearTimeout(stateTimeoutId);
-        stateTimeoutId = setTimeout(() => syncGameState(), Math.max(100, delayMs));
+        stateTimeoutId = setTimeout(() => syncGameState(), Math.max(50, delayMs));
     }
 
     async function syncGameState() {
@@ -1246,8 +1250,8 @@
                 const nowServer = (Date.now() / 1000) + serverTimeOffset;
                 const flightTotal = (r.flight_duration) ? parseFloat(r.flight_duration) : 5.0;
                 const flightRemaining = Math.max(0, (r.scheduled_start_time + flightTotal) - nowServer);
-                const pauseDuration = 3.0;
-                const nextSyncMs = (flightRemaining + pauseDuration) * 1000 + 200;
+                const pauseDuration = (r.crashed_pause_seconds !== undefined) ? Number(r.crashed_pause_seconds) : 0;
+                const nextSyncMs = Math.max(50, (flightRemaining + pauseDuration) * 1000 + 50);
 
                 scheduleNextSync(nextSyncMs);
 
@@ -1255,8 +1259,8 @@
                 if (localCountdownInterval) clearInterval(localCountdownInterval);
                 const crashVal = parseFloat(r.crash_multiplier).toFixed(2);
                 triggerLocalCrash(crashVal);
-                const pauseLeft = Math.max(0.2, r.crashed_pause_left || 3.0);
-                scheduleNextSync(pauseLeft * 1000 + 200);
+                const pauseLeft = (r.crashed_pause_left !== undefined) ? Number(r.crashed_pause_left) : 0;
+                scheduleNextSync(Math.max(50, pauseLeft * 1000 + 50));
             }
 
             cachedAllBets = data.bets || [];

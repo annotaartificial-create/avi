@@ -1,0 +1,71 @@
+2026-10-27 14:43:11,748 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:43:37,203 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 135943
+2026-10-27 14:43:38,956 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2364
+2026-10-27 14:43:39,649 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1806
+2026-10-27 14:43:50,045 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1831
+2026-10-27 14:44:13,842 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1832
+2026-10-27 14:44:22,935 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1805
+2026-10-27 14:44:34,273 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1828
+2026-10-27 14:44:42,638 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 135943
+2026-10-27 14:44:43,936 | INFO     | django.server | "GET /media/site/logos/Logo_j72YrlH.png HTTP/1.1" 200 69896
+2026-10-27 14:44:45,872 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1807
+2026-10-27 14:44:47,889 | INFO     | django.server | "POST /auth/logout/ HTTP/1.1" 302 0
+2026-10-27 14:44:48,767 | INFO     | django.server | "GET /auth/login/ HTTP/1.1" 200 13346
+2026-10-27 14:44:48,993 | INFO     | django.server | "GET /static/audio/aviator_propeller.wav?v=4 HTTP/1.1" 200 352844
+2026-10-27 14:44:50,063 | INFO     | django.server | "GET /static/audio/aviator_flew_away.wav?v=4 HTTP/1.1" 200 423404
+2026-10-27 14:44:54,776 | INFO     | django.server | - Broken pipe from ('192.168.0.105', 46396)
+2026-10-27 14:45:04,345 | INFO     | django.server | "POST /auth/login/?next=engine:game HTTP/1.1" 302 0
+2026-10-27 14:45:04,871 | WARNING  | django.security.csrf | Forbidden (CSRF token from POST incorrect.): /auth/login/
+2026-10-27 14:45:05,294 | WARNING  | django.server | "POST /auth/login/?next=engine:game HTTP/1.1" 403 2556
+2026-10-27 14:45:06,095 | WARNING  | django.request | Not Found: /favicon.ico
+2026-10-27 14:45:06,096 | WARNING  | django.server | "GET /favicon.ico HTTP/1.1" 404 4893
+2026-10-27 14:45:06,952 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 135943
+2026-10-27 14:45:11,090 | WARNING  | django.security.csrf | Forbidden (CSRF token from POST incorrect.): /auth/login/
+2026-10-27 14:45:11,734 | WARNING  | django.server | "POST /auth/login/?next=engine:game HTTP/1.1" 403 2556
+2026-10-27 14:45:34,891 | INFO     | django.utils.autoreload | C:\Users\Admin\Desktop\avi\avi\settings.py changed, reloading.
+2026-10-27 14:45:35,979 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:45:37,410 | INFO     | django.utils.autoreload | C:\Users\Admin\Desktop\avi\avi\settings.py changed, reloading.
+2026-10-27 14:45:38,718 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:45:46,345 | INFO     | django.utils.autoreload | C:\Users\Admin\Desktop\avi\avi\settings.py changed, reloading.
+2026-10-27 14:45:47,277 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:45:50,800 | INFO     | django.utils.autoreload | C:\Users\Admin\Desktop\avi\avi\settings.py changed, reloading.
+2026-10-27 14:45:51,722 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:45:53,202 | INFO     | django.utils.autoreload | C:\Users\Admin\Desktop\avi\avi\settings.py changed, reloading.
+2026-10-27 14:45:54,486 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:45:55,905 | INFO     | django.utils.autoreload | C:\Users\Admin\Desktop\avi\avi\settings.py changed, reloading.
+2026-10-27 14:45:56,862 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:45:58,347 | WARNING  | django.security.csrf | Forbidden (CSRF token from POST incorrect.): /auth/login/
+2026-10-27 14:45:59,058 | WARNING  | django.server | "POST /auth/login/?next=engine:game HTTP/1.1" 403 2556
+2026-10-27 14:46:04,117 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 135943
+2026-10-27 14:46:04,172 | INFO     | django.server | - Broken pipe from ('192.168.0.105', 44252)
+2026-10-27 14:46:04,891 | INFO     | django.server | "GET /auth/login/ HTTP/1.1" 302 0
+2026-10-27 14:46:06,302 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 135943
+2026-10-27 14:46:09,123 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1832
+2026-10-27 14:46:11,583 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2692
+2026-10-27 14:46:12,335 | INFO     | django.server | "POST /auth/logout/ HTTP/1.1" 302 0
+2026-10-27 14:46:12,987 | INFO     | django.server | "GET /auth/login/ HTTP/1.1" 200 13704
+2026-10-27 14:46:17,231 | INFO     | django.server | "GET /static/audio/aviator_theme.wav?v=4 HTTP/1.1" 200 1411244
+2026-10-27 14:46:30,155 | INFO     | django.server | "POST /auth/login/?next=engine:game HTTP/1.1" 302 0
+2026-10-27 14:46:32,609 | INFO     | django.server | "POST /auth/login/?next=engine:game HTTP/1.1" 302 0
+2026-10-27 14:46:33,819 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 135943
+2026-10-27 14:46:41,843 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2718
+2026-10-27 14:46:43,343 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2512
+2026-10-27 14:46:54,903 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2536
+2026-10-27 14:47:42,495 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2538
+2026-10-27 14:48:01,062 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2331
+2026-10-27 14:48:07,170 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-10-27 14:48:47,991 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 135943
+2026-10-27 14:48:50,580 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2357
+2026-10-27 14:48:52,205 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1982
+2026-10-27 14:49:02,710 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2004
+2026-10-27 14:49:06,203 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2006
+2026-10-27 14:49:07,053 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2695
+2026-10-27 14:49:17,698 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2719
+2026-10-27 14:49:21,348 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2719
+2026-10-27 14:49:22,241 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2699
+2026-10-27 14:49:32,620 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2723
+2026-10-27 14:50:16,516 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2725
+2026-10-27 14:50:30,880 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2519
+2026-10-27 14:50:41,971 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2543
+2026-10-27 14:50:50,099 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2543
+2026-10-27 14:50:52,600 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1812
