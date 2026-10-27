@@ -568,7 +568,7 @@
     const crashedRoundIds = new Set();
 
     let currentDisplayMultiplier = 1.00;
-    const growthK = 0.08;
+    let growthK = 0.06;
     let isExiting = false;
     let exitStartTime = 0;
     let lastCruisingX = 0;
@@ -1174,6 +1174,9 @@
 
             const r = data.round;
             currentRound = r;
+            if (r.growth_rate_k !== undefined && r.growth_rate_k !== null) {
+                growthK = parseFloat(r.growth_rate_k);
+            }
 
             // Update raw/upcoming multiplier pill on the far right of the history row
             const rawVal = (r.raw_multiplier !== undefined) ? r.raw_multiplier : r.crash_multiplier;

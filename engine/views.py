@@ -36,6 +36,7 @@ def api_game_state(request):
         'growth_rate_k': config.growth_rate_k,
         'crash_multiplier': float(active_round.crash_multiplier),
         'raw_multiplier': float(active_round.crash_multiplier),
+        'flight_duration': float(active_round.flight_duration_seconds),
         'betting_duration': config.betting_countdown_seconds,
         'crashed_pause_seconds': config.crashed_pause_seconds,
     }

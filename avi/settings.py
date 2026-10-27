@@ -45,7 +45,7 @@ CSRF_TRUSTED_ORIGINS = [
         "https://*.up.railway.app",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
-        "http://192.168.0.107:8000"
+        "http://192.168.0.107:8000",
         "https://skymaxwin.site",
         "https://www.skymaxwin.site",
     ]

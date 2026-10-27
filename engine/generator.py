@@ -63,7 +63,7 @@ def calculate_crash_multiplier(
     return Decimal(f"{final_val:.2f}")
 
 
-def multiplier_to_flight_duration(multiplier: Decimal, growth_k: float = 0.08) -> float:
+def multiplier_to_flight_duration(multiplier: Decimal, growth_k: float = 0.06) -> float:
     """
     Converts a multiplier to flight duration in seconds.
     Multiplier(t) = e^(k * t) => t = ln(Multiplier) / k
@@ -75,7 +75,7 @@ def multiplier_to_flight_duration(multiplier: Decimal, growth_k: float = 0.08) -
     return round(duration, 3)
 
 
-def flight_duration_to_multiplier(seconds: float, growth_k: float = 0.08) -> Decimal:
+def flight_duration_to_multiplier(seconds: float, growth_k: float = 0.06) -> Decimal:
     """
     Converts elapsed flight duration in seconds back to the active multiplier.
     """
