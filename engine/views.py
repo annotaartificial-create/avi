@@ -212,6 +212,7 @@ def api_cashout(request):
         return JsonResponse({'success': False, 'error': f'Cashout error: {str(e)}'}, status=500)
 
 
+@login_required
 def game_view(request):
     """
     Primary cockpit view for the crash game.

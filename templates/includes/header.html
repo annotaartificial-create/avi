@@ -42,9 +42,10 @@
                         Sign in
                     </a>
 
-                    <!-- Play now CTA (Large screens only; on phones it is in the sidebar) -->
-                    <a href="{% url 'engine:game' %}" class="hidden md:flex h-12 px-6 rounded-xl font-bold text-[14px] text-[#101820] bg-[#00D084] hover:bg-[#00b875] transition-all duration-150 shadow-sm active:scale-98 items-center justify-center">
-                        Play now
+                    <!-- Play now CTA (Directs unauthenticated guests to create account) -->
+                    <a href="{% url 'acc:signup' %}" class="hidden md:flex h-12 px-6 rounded-xl font-bold text-[14px] text-[#101820] bg-[#00D084] hover:bg-[#00b875] transition-all duration-150 shadow-sm active:scale-98 items-center justify-center gap-1.5">
+                        <span>Play now</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
                 {% endif %}
 
