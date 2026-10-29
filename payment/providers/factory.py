@@ -7,6 +7,7 @@ from django.conf import settings
 from .base import BasePaymentProvider, PaymentProviderError
 from .daraja import DarajaProvider
 from .kopokopo import KopoKopoProvider
+from .lipalink import LipaLinkProvider
 from .payhero import PayHeroProvider
 
 PROVIDER_REGISTRY: dict[str, Type[BasePaymentProvider]] = {
@@ -14,6 +15,7 @@ PROVIDER_REGISTRY: dict[str, Type[BasePaymentProvider]] = {
     "daraja": DarajaProvider,
     "mpesa": DarajaProvider,
     "payhero": PayHeroProvider,
+    "lipalink": LipaLinkProvider,
 }
 
 

@@ -10,6 +10,7 @@ from .base import (
 from .daraja import DarajaProvider
 from .factory import get_payment_provider, register_payment_provider
 from .kopokopo import KopoKopoProvider
+from .lipalink import LipaLinkProvider
 from .payhero import PayHeroProvider
 
 __all__ = [
@@ -17,6 +18,7 @@ __all__ = [
     "DarajaProvider",
     "DepositInitiateResult",
     "KopoKopoProvider",
+    "LipaLinkProvider",
     "PayHeroProvider",
     "PaymentProviderError",
     "TransactionStatusResult",

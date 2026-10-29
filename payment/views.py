@@ -257,7 +257,7 @@ def _perform_direct_status_check(ledger: PaymentLedger) -> JsonResponse:
             return JsonResponse({
                 "status": "PENDING",
                 "reference": ledger.reference,
-                "message": query_result.reason or "Payment is still processing on M-Pesa. If you have already entered your PIN, please wait a moment and click Check Status again.",
+                "message": query_result.reason or "Waiting for PIN entry and M-Pesa confirmation...",
             })
 
     except PaymentProviderError as exc:
@@ -266,7 +266,7 @@ def _perform_direct_status_check(ledger: PaymentLedger) -> JsonResponse:
             "status": "PENDING",
             "reference": ledger.reference,
             "error": str(exc),
-            "message": f"Unable to verify with {ledger.provider.title()}: {exc}. If you already entered your PIN, please click Check Status again.",
+            "message": "Waiting for PIN entry and M-Pesa confirmation...",
         })
     except Exception as exc:
         logger.error("Unexpected error in direct status check for ref %s: %s", ledger.reference, exc, exc_info=True)
@@ -274,7 +274,7 @@ def _perform_direct_status_check(ledger: PaymentLedger) -> JsonResponse:
             "status": "PENDING",
             "reference": ledger.reference,
             "error": str(exc),
-            "message": "Error connecting to payment provider. Please try clicking Check Status again.",
+            "message": "Waiting for PIN entry and M-Pesa confirmation...",
         })
 
 
@@ -283,14 +283,14 @@ def _perform_direct_status_check(ledger: PaymentLedger) -> JsonResponse:
 def deposit_status_view(request, reference: str):
     """
     Polls the status of a deposit transaction.
-    By default (passive polling during the PIN countdown), it strictly checks the local database
-    (PaymentLedger) to see if the webhook callback arrived. It does NOT call the provider's
-    status API during the countdown so we don't bombard the gateway while the user is typing their PIN.
-    If 'verify=true' is passed, it triggers direct provider status verification.
+    1. Checks local database (PaymentLedger) to see if transaction is already completed or failed (e.g. via webhook).
+    2. If still pending locally, queries the provider's check status function.
+    3. Updates the transaction using the result and returns the completed or failed result to frontend.
+    4. If provider says transaction is still pending, returns PENDING so frontend can send the next poll.
     """
     ledger = get_object_or_404(PaymentLedger, reference=reference, user=request.user)
 
-    # 1. If already completed, return immediately
+    # 1. Local check: If already completed, return immediately
     if ledger.is_completed:
         return JsonResponse({
             "status": "COMPLETED",
@@ -301,7 +301,7 @@ def deposit_status_view(request, reference: str):
             "message": "Deposit confirmed! Your wallet balance has been updated.",
         })
 
-    # 2. If failed, return failure state
+    # 2. Local check: If failed, return failure state
     if ledger.is_failed:
         return JsonResponse({
             "status": "FAILED",
@@ -309,16 +309,9 @@ def deposit_status_view(request, reference: str):
             "message": ledger.error_message or "Payment was not completed. Please try again.",
         })
 
-    # 3. Direct verification requested (via ?verify=true)
-    if request.GET.get("verify", "").lower() in ("true", "1", "yes"):
-        return _perform_direct_status_check(ledger)
-
-    # 4. Passive polling: ledger is still pending, waiting for callback
-    return JsonResponse({
-        "status": "PENDING",
-        "reference": ledger.reference,
-        "message": "Waiting for PIN entry and M-Pesa confirmation...",
-    })
+    # 3. Before telling frontend the transaction is still pending, call the check status
+    # function of the provider. Update the transaction using the result and return it.
+    return _perform_direct_status_check(ledger)
 
 
 @login_required

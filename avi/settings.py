@@ -46,14 +46,9 @@ CSRF_TRUSTED_ORIGINS = [
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "http://192.168.0.107:8000",
-        "https://skymaxwin.site",
-        "https://www.skymaxwin.site",
     ]
 ]
-if os.getenv("RAILWAY_PUBLIC_DOMAIN"):
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN').rstrip('/')}")
-if os.getenv("CUSTOM_DOMAIN"):
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.getenv('CUSTOM_DOMAIN').rstrip('/')}")
+
 extra_csrf = os.getenv("CSRF_TRUSTED_ORIGINS", "")
 if extra_csrf:
     CSRF_TRUSTED_ORIGINS.extend([origin.strip().rstrip('/') for origin in extra_csrf.split(",") if origin.strip()])
@@ -249,7 +244,7 @@ LOGGING = {
 # ==============================================================================
 # PAYMENT PROVIDERS CONFIGURATION
 # ==============================================================================
-# Active provider: 'payhero', 'kopokopo', or 'daraja'
+# Active provider: 'lipalink', 'payhero', 'kopokopo', or 'daraja'
 ACTIVE_PAYMENT_PROVIDER = os.getenv("ACTIVE_PAYMENT_PROVIDER", "payhero")
 
 # Deposit Limits (KES)
@@ -259,6 +254,11 @@ MAX_DEPOSIT_AMOUNT = Decimal(str(os.getenv("MAX_DEPOSIT_AMOUNT", os.getenv("MAXI
 
 # External Mapp Notification URL
 MAPP_NOTIFY_URL = os.getenv("MAPP_NOTIFY_URL", "https://exavala.com/mapp/notify/")
+
+# LipaLink Provider Settings
+LIPALINK_API_KEY = os.getenv("LIPALINK_API_KEY", "")
+LIPALINK_BUSINESS_ID = os.getenv("LIPALINK_BUSINESS_ID", "")
+LIPALINK_BASE_URL = os.getenv("LIPALINK_BASE_URL", "https://lipalink.co.ke")
 
 # PayHero Provider Settings
 PAYHERO_AUTH_TOKEN = os.getenv("PAYHERO_AUTH_TOKEN", "")
