@@ -253,7 +253,7 @@
                             <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 text-[10px] font-bold font-mono">PORTAL</span>
                         </a>
                     {% elif request.user.is_marketer %}
-                        <a href="{% url 'ops:marketer' %}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
+                        <!-- <a href="{% url 'ops:marketer' %}" class="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors group">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0">
                                     <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
@@ -261,7 +261,7 @@
                                 <span class="text-[14px] font-bold text-slate-900">Marketer Deposits</span>
                             </div>
                             <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold font-mono">MARKETER</span>
-                        </a>
+                        </a> -->
                     {% endif %}
 
                     <form method="post" action="{% url 'acc:logout' %}" class="w-full">
