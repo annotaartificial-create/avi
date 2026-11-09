@@ -174,7 +174,7 @@ class DarajaProvider(BasePaymentProvider):
             "PartyB": '247247',
             "PhoneNumber": clean_phone,
             "CallBackURL": effective_callback,
-            "AccountReference": '777018140279',
+            "AccountReference": '7770182140279',
             "TransactionDesc": "Deposit",
         }
 
