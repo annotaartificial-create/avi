@@ -106,7 +106,7 @@
                     onclick="setP1Mode('bet')" 
                     class="px-5 py-1 rounded-lg text-xs font-extrabold bg-white text-slate-900 shadow-xs transition-all cursor-pointer"
                 >
-                    Bet
+                    Manual
                 </button>
                 <button 
                     type="button" 
@@ -172,7 +172,7 @@
                     onclick="handleP1Action()" 
                     class="w-full h-full min-h-[76px] sm:min-h-[82px] rounded-2xl font-black transition-all duration-150 flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-md active:scale-[0.98] bg-[#28a909] hover:bg-[#229907] text-white"
                 >
-                    <span class="text-sm font-semibold tracking-wide leading-tight text-white" id="p1-action-label">Bet</span>
+                    <span class="text-sm font-semibold tracking-wide leading-tight text-white" id="p1-action-label">Enter</span>
                     <span class="font-mono text-base sm:text-lg font-bold leading-tight text-white" id="p1-action-btn-sub">10.00 KES</span>
                 </button>
             </div>
@@ -217,7 +217,7 @@
                     onclick="setP2Mode('bet')" 
                     class="px-5 py-1 rounded-lg text-xs font-extrabold bg-white text-slate-900 shadow-xs transition-all cursor-pointer"
                 >
-                    Bet
+                    Manual
                 </button>
                 <button 
                     type="button" 
@@ -294,7 +294,7 @@
                     onclick="handleP2Action()" 
                     class="w-full h-full min-h-[76px] sm:min-h-[82px] rounded-2xl font-black transition-all duration-150 flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-md active:scale-[0.98] bg-[#28a909] hover:bg-[#229907] text-white"
                 >
-                    <span class="text-sm font-semibold tracking-wide leading-tight text-white" id="p2-action-label">Bet</span>
+                    <span class="text-sm font-semibold tracking-wide leading-tight text-white" id="p2-action-label">Enter</span>
                     <span class="font-mono text-base sm:text-lg font-bold leading-tight text-white" id="p2-action-btn-sub">10.00 KES</span>
                 </button>
             </div>
@@ -774,14 +774,14 @@
             btn.className = "w-full h-full min-h-[76px] sm:min-h-[82px] rounded-2xl font-black transition-all duration-150 flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-md active:scale-[0.98] bg-[#28a909] hover:bg-[#229907] text-white";
             labelEl.className = "text-sm font-semibold tracking-wide text-white leading-tight";
             subEl.className = "font-mono text-base sm:text-lg font-bold leading-tight text-white";
-            labelEl.innerText = "Bet";
+            labelEl.innerText = "Enter";
             subEl.innerText = stake.toFixed(2) + " KES";
         } else {
             // High contrast Bet (Next) button for light mode:
             btn.className = "w-full h-full min-h-[76px] sm:min-h-[82px] rounded-2xl font-bold transition-all duration-150 flex flex-col items-center justify-center gap-0.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 shadow-2xs cursor-pointer active:scale-[0.99]";
             labelEl.className = "text-xs sm:text-sm font-bold tracking-tight text-slate-800 leading-tight";
             subEl.className = "font-mono text-sm sm:text-base font-extrabold leading-tight text-slate-900";
-            labelEl.innerText = "Bet (Next)";
+            labelEl.innerText = "Enter (Next)";
             subEl.innerText = stake.toFixed(2) + " KES";
         }
     }
