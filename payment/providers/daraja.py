@@ -95,6 +95,7 @@ class DarajaProvider(BasePaymentProvider):
 
     def _get_credentials(self) -> dict[str, str]:
         env = getattr(settings, "DARAJA_ENVIRONMENT", "sandbox").strip().lower()
+        shortcode = getattr(settings, "DARAJA_SHORTCODE").strip().lower()
         consumer_key = getattr(settings, "DARAJA_CONSUMER_KEY", "").strip()
         consumer_secret = getattr(settings, "DARAJA_CONSUMER_SECRET", "").strip()
         till_number = getattr(settings, "DARAJA_TILL_NUMBER", "").strip()
