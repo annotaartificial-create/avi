@@ -87,7 +87,7 @@ def _http_get(url: str, headers: dict | None = None, timeout: int = 30) -> dict[
 
 class DarajaProvider(BasePaymentProvider):
     """
-    Safaricom Daraja API payment adapter for M-Pesa STK Push.
+    Safaricom Daraja API payment adapter for M-Pesa STK Push. sss
     All communication with Safaricom Daraja is self-contained in this module.
     """
 
