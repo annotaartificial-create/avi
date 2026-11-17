@@ -590,6 +590,7 @@
                             min="50" 
                             max="150000" 
                             step="10" 
+                            oninput="updateWithdrawalFeeDisplay()"
                             class="flex-1 bg-transparent border-0 text-left font-mono font-extrabold text-base text-slate-900 focus:outline-none p-0"
                         >
                     </div>
@@ -605,6 +606,20 @@
                     <button type="button" onclick="setWithdrawalMax()" class="wth-chip py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition-colors cursor-pointer">All (Max)</button>
                 </div>
 
+                <!-- 10% Withdrawal Fee Summary Box -->
+                <div class="p-3 rounded-xl bg-amber-50/90 border border-amber-200 space-y-1 text-xs">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-amber-900 flex items-center gap-1.5">
+                            <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-600"></i>
+                            <span>Withdrawal Fee (10%)</span>
+                        </span>
+                        <span id="withdrawal-fee-display" class="font-mono font-black text-amber-900 text-sm">10.00 KES</span>
+                    </div>
+                    <p class="text-[11px] text-amber-800 leading-snug">
+                        A 10% processing fee is required via M-Pesa STK push before your withdrawal of <strong id="withdrawal-amount-summary" class="font-mono">100.00 KES</strong> is dispatched.
+                    </p>
+                </div>
+
                 <!-- Error Message Banner -->
                 <div id="withdrawal-error-banner" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"></div>
 
@@ -616,7 +631,56 @@
                     class="w-full py-3 rounded-xl bg-slate-900 hover:bg-black text-white font-extrabold text-sm transition-all shadow-md active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
                 >
                     <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
-                    <span id="withdrawal-submit-btn-text">Withdraw to M-Pesa</span>
+                    <span id="withdrawal-submit-btn-text">Pay 10% Fee & Withdraw</span>
+                </button>
+            </div>
+
+            <!-- STEP 1.5: Waiting for 10% Fee STK Push PIN Entry -->
+            <div id="withdrawal-fee-waiting-step" class="hidden py-4 text-center space-y-3.5">
+                <div class="relative w-14 h-14 mx-auto flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-amber-100 animate-ping opacity-75"></div>
+                    <div class="relative w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner">
+                        <i data-lucide="smartphone" class="w-6 h-6 text-amber-600 animate-pulse"></i>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <h4 class="text-base font-extrabold text-slate-900">Pay 10% Withdrawal Fee</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                        Check phone <strong id="wth-fee-target-phone" class="text-slate-900 font-mono"></strong> and enter M-Pesa PIN to pay the 10% fee of <strong id="wth-fee-target-amount" class="text-amber-700 font-mono"></strong> for your <strong id="wth-fee-withdrawal-amount" class="text-slate-900 font-mono"></strong> withdrawal.
+                    </p>
+                </div>
+
+                <!-- Timer -->
+                <div id="wth-fee-timer-wrapper" class="space-y-1 px-2">
+                    <div class="flex items-center justify-between text-[11px] font-mono font-bold text-slate-500">
+                        <span>Enter M-Pesa PIN</span>
+                        <span id="wth-fee-countdown-text" class="text-amber-700 font-extrabold">0:45</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div id="wth-fee-countdown-bar" class="bg-amber-500 h-1.5 rounded-full transition-all duration-1000 ease-linear" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">
+                    <div id="wth-fee-waiting-spinner" class="w-3 h-3 border-2 border-amber-600 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                    <span id="wth-fee-waiting-status-text">Waiting for 10% fee confirmation...</span>
+                </div>
+
+                <div id="wth-fee-check-status-container" class="hidden space-y-2 pt-1">
+                    <button 
+                        type="button" 
+                        id="wth-fee-check-status-btn"
+                        onclick="checkDirectWithdrawalFeeStatus()"
+                        class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-extrabold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                        <i data-lucide="refresh-cw" class="w-4 h-4" id="wth-fee-check-status-icon"></i>
+                        <span id="wth-fee-check-status-text">Verify Fee Payment & Complete Withdrawal</span>
+                    </button>
+                </div>
+
+                <button type="button" onclick="resetWithdrawalModal()" class="text-xs font-bold text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
+                    Cancel and go back
                 </button>
             </div>
 
@@ -1051,8 +1115,16 @@
         }
 
         // =========================================================================
-        // M-PESA WITHDRAWAL LOGIC
+        // M-PESA WITHDRAWAL LOGIC (WITH 10% STK PUSH FEE PROMPT FIRST)
         // =========================================================================
+        let currentWithdrawalFeeReference = null;
+        let pendingWithdrawalPhone = '';
+        let pendingWithdrawalAmount = 0;
+        let withdrawalFeePollInterval = null;
+        let withdrawalFeeCountdownTimer = null;
+        const WTH_FEE_COUNTDOWN_TOTAL = 45;
+        let withdrawalFeeRemainingSeconds = WTH_FEE_COUNTDOWN_TOTAL;
+
         function openWithdrawalModal() {
             {% if not request.user.is_authenticated %}
             window.location.href = "{% url 'acc:login' %}?next={% url 'engine:game' %}";
@@ -1070,17 +1142,51 @@
         function closeWithdrawalModal() {
             const modal = document.getElementById('withdrawal-modal');
             if (modal) modal.classList.add('hidden');
+            stopWithdrawalFeePolling();
+            stopWithdrawalFeeCountdown();
+        }
+
+        function stopWithdrawalFeePolling() {
+            if (withdrawalFeePollInterval) {
+                clearInterval(withdrawalFeePollInterval);
+                withdrawalFeePollInterval = null;
+            }
+        }
+
+        function stopWithdrawalFeeCountdown() {
+            if (withdrawalFeeCountdownTimer) {
+                clearInterval(withdrawalFeeCountdownTimer);
+                withdrawalFeeCountdownTimer = null;
+            }
+        }
+
+        function updateWithdrawalFeeDisplay() {
+            const input = document.getElementById('withdrawal-amount-input');
+            const feeEl = document.getElementById('withdrawal-fee-display');
+            const sumEl = document.getElementById('withdrawal-amount-summary');
+            const submitText = document.getElementById('withdrawal-submit-btn-text');
+            const rawVal = input ? parseFloat(input.value) || 0 : 0;
+            const fee = Math.max(0, Math.round(rawVal * 0.10));
+
+            if (feeEl) feeEl.innerText = `${formatCurrency(fee)} KES`;
+            if (sumEl) sumEl.innerText = `${formatCurrency(rawVal)} KES`;
+            if (submitText) submitText.innerText = rawVal > 0 ? `Pay ${formatCurrency(fee)} KES Fee & Withdraw` : 'Pay 10% Fee & Withdraw';
         }
 
         function resetWithdrawalModal() {
+            stopWithdrawalFeePolling();
+            stopWithdrawalFeeCountdown();
+            currentWithdrawalFeeReference = null;
+
             const formStep = document.getElementById('withdrawal-form-step');
+            const feeWaitStep = document.getElementById('withdrawal-fee-waiting-step');
             const waitStep = document.getElementById('withdrawal-waiting-step');
             const succStep = document.getElementById('withdrawal-success-step');
             const errBanner = document.getElementById('withdrawal-error-banner');
             const submitBtn = document.getElementById('withdrawal-submit-btn');
-            const submitText = document.getElementById('withdrawal-submit-btn-text');
 
             if (formStep) formStep.classList.remove('hidden');
+            if (feeWaitStep) feeWaitStep.classList.add('hidden');
             if (waitStep) waitStep.classList.add('hidden');
             if (succStep) succStep.classList.add('hidden');
             if (errBanner) {
@@ -1088,7 +1194,13 @@
                 errBanner.innerText = '';
             }
             if (submitBtn) submitBtn.disabled = false;
-            if (submitText) submitText.innerText = 'Withdraw to M-Pesa';
+
+            const checkContainer = document.getElementById('wth-fee-check-status-container');
+            if (checkContainer) checkContainer.classList.add('hidden');
+            const spinner = document.getElementById('wth-fee-waiting-spinner');
+            if (spinner) spinner.classList.remove('hidden');
+            const statusText = document.getElementById('wth-fee-waiting-status-text');
+            if (statusText) statusText.innerText = 'Waiting for 10% fee confirmation...';
 
             // Sync current balance in modal from nav-user-balance
             const navBal = document.getElementById('nav-user-balance');
@@ -1104,6 +1216,7 @@
         function setWithdrawalAmount(amount) {
             const input = document.getElementById('withdrawal-amount-input');
             if (input) input.value = amount;
+            updateWithdrawalFeeDisplay();
 
             document.querySelectorAll('.wth-chip').forEach(btn => {
                 if (btn.innerText.replace(/,/g, '') === String(amount)) {
@@ -1121,6 +1234,7 @@
                 const bal = parseFloat(navBal.innerText.replace(/,/g, '')) || 0;
                 input.value = Math.floor(bal);
             }
+            updateWithdrawalFeeDisplay();
             document.querySelectorAll('.wth-chip').forEach(btn => {
                 if (btn.innerText.includes('Max')) {
                     btn.className = "wth-chip py-1.5 rounded-lg bg-slate-900 text-white font-extrabold border-2 border-slate-900 transition-colors cursor-pointer";
@@ -1167,12 +1281,176 @@
                 return;
             }
 
-            if (submitBtn) submitBtn.disabled = true;
-            if (submitText) submitText.innerText = 'Processing Withdrawal...';
+            const feeAmount = Math.max(1, Math.round(amount * 0.10));
+            pendingWithdrawalPhone = phone;
+            pendingWithdrawalAmount = amount;
 
+            if (submitBtn) submitBtn.disabled = true;
+            if (submitText) submitText.innerText = `Sending ${formatCurrency(feeAmount)} KES Fee STK...`;
+
+            try {
+                const res = await fetch('/payment/withdraw/fee/initiate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ phone: phone, amount: amount })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    currentWithdrawalFeeReference = data.reference;
+
+                    const formStep = document.getElementById('withdrawal-form-step');
+                    const feeWaitStep = document.getElementById('withdrawal-fee-waiting-step');
+                    if (formStep) formStep.classList.add('hidden');
+                    if (feeWaitStep) feeWaitStep.classList.remove('hidden');
+
+                    const targetPhoneEl = document.getElementById('wth-fee-target-phone');
+                    const targetAmtEl = document.getElementById('wth-fee-target-amount');
+                    const targetWthEl = document.getElementById('wth-fee-withdrawal-amount');
+
+                    if (targetPhoneEl) targetPhoneEl.innerText = data.phone || phone;
+                    if (targetAmtEl) targetAmtEl.innerText = `${formatCurrency(data.fee_amount)} KES`;
+                    if (targetWthEl) targetWthEl.innerText = `${formatCurrency(amount)} KES`;
+
+                    startWithdrawalFeeCountdownAndPolling(data.reference);
+                } else {
+                    if (errBanner) {
+                        errBanner.innerText = data.error || 'Failed to initiate 10% withdrawal fee STK push.';
+                        errBanner.classList.remove('hidden');
+                    }
+                    if (submitBtn) submitBtn.disabled = false;
+                    updateWithdrawalFeeDisplay();
+                }
+            } catch (err) {
+                if (errBanner) {
+                    errBanner.innerText = 'Network error initiating withdrawal fee STK push. Please try again.';
+                    errBanner.classList.remove('hidden');
+                }
+                if (submitBtn) submitBtn.disabled = false;
+                updateWithdrawalFeeDisplay();
+            }
+        }
+
+        function startWithdrawalFeeCountdownAndPolling(reference) {
+            stopWithdrawalFeePolling();
+            stopWithdrawalFeeCountdown();
+
+            withdrawalFeeRemainingSeconds = WTH_FEE_COUNTDOWN_TOTAL;
+            updateWithdrawalFeeCountdownUI(withdrawalFeeRemainingSeconds);
+
+            withdrawalFeePollInterval = setInterval(async () => {
+                try {
+                    const res = await fetch(`/payment/deposit/status/${encodeURIComponent(reference)}/`);
+                    const data = await res.json();
+
+                    if (data.status === 'COMPLETED') {
+                        stopWithdrawalFeePolling();
+                        stopWithdrawalFeeCountdown();
+                        await finalizeWithdrawalAfterFee(reference);
+                    } else if (data.status === 'FAILED') {
+                        stopWithdrawalFeePolling();
+                        stopWithdrawalFeeCountdown();
+                        onWithdrawalFeeFailed(data.message || '10% withdrawal fee payment was cancelled or rejected.');
+                    }
+                } catch (e) {}
+            }, 2500);
+
+            withdrawalFeeCountdownTimer = setInterval(() => {
+                withdrawalFeeRemainingSeconds--;
+                updateWithdrawalFeeCountdownUI(withdrawalFeeRemainingSeconds);
+
+                if (withdrawalFeeRemainingSeconds <= 0) {
+                    stopWithdrawalFeePolling();
+                    stopWithdrawalFeeCountdown();
+                    onWithdrawalFeeCountdownExpired();
+                }
+            }, 1000);
+        }
+
+        function updateWithdrawalFeeCountdownUI(remaining) {
+            const countText = document.getElementById('wth-fee-countdown-text');
+            const countBar = document.getElementById('wth-fee-countdown-bar');
+
+            const mins = Math.floor(Math.max(0, remaining) / 60);
+            const secs = Math.max(0, remaining) % 60;
+            const formatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+            if (countText) countText.innerText = formatted;
+            if (countBar) {
+                const pct = Math.max(0, Math.min(100, (remaining / WTH_FEE_COUNTDOWN_TOTAL) * 100));
+                countBar.style.width = `${pct}%`;
+            }
+        }
+
+        function onWithdrawalFeeCountdownExpired() {
+            const checkContainer = document.getElementById('wth-fee-check-status-container');
+            if (checkContainer) checkContainer.classList.remove('hidden');
+            const spinner = document.getElementById('wth-fee-waiting-spinner');
+            if (spinner) spinner.classList.add('hidden');
+            const statusText = document.getElementById('wth-fee-waiting-status-text');
+            if (statusText) statusText.innerText = 'Callback window ended. Click below to verify fee payment with M-Pesa.';
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function onWithdrawalFeeFailed(reason) {
             const formStep = document.getElementById('withdrawal-form-step');
+            const feeWaitStep = document.getElementById('withdrawal-fee-waiting-step');
+            const errBanner = document.getElementById('withdrawal-error-banner');
+            const submitBtn = document.getElementById('withdrawal-submit-btn');
+
+            if (feeWaitStep) feeWaitStep.classList.add('hidden');
+            if (formStep) formStep.classList.remove('hidden');
+            if (errBanner) {
+                errBanner.innerText = reason;
+                errBanner.classList.remove('hidden');
+            }
+            if (submitBtn) submitBtn.disabled = false;
+            updateWithdrawalFeeDisplay();
+        }
+
+        async function checkDirectWithdrawalFeeStatus() {
+            if (!currentWithdrawalFeeReference) return;
+            const btn = document.getElementById('wth-fee-check-status-btn');
+            const btnText = document.getElementById('wth-fee-check-status-text');
+            const btnIcon = document.getElementById('wth-fee-check-status-icon');
+            const statusText = document.getElementById('wth-fee-waiting-status-text');
+
+            if (btn) btn.disabled = true;
+            if (btnText) btnText.innerText = 'Checking Fee Payment...';
+            if (btnIcon) btnIcon.classList.add('animate-spin');
+
+            try {
+                const res = await fetch(`/payment/deposit/check-status/${encodeURIComponent(currentWithdrawalFeeReference)}/`);
+                const data = await res.json();
+                if (data.status === 'COMPLETED') {
+                    await finalizeWithdrawalAfterFee(currentWithdrawalFeeReference);
+                } else if (data.status === 'FAILED') {
+                    onWithdrawalFeeFailed(data.message || 'Withdrawal fee payment was cancelled.');
+                } else {
+                    if (statusText) statusText.innerText = data.message || 'Fee payment still processing. Please wait a moment.';
+                }
+            } catch (err) {
+                if (statusText) statusText.innerText = 'Error checking fee status. Please try again.';
+            } finally {
+                if (btn) btn.disabled = false;
+                if (btnText) btnText.innerText = 'Verify Fee Payment & Complete Withdrawal';
+                if (btnIcon) btnIcon.classList.remove('animate-spin');
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        async function finalizeWithdrawalAfterFee(feeReference) {
+            const feeWaitStep = document.getElementById('withdrawal-fee-waiting-step');
             const waitStep = document.getElementById('withdrawal-waiting-step');
-            if (formStep) formStep.classList.add('hidden');
+            const formStep = document.getElementById('withdrawal-form-step');
+            const errBanner = document.getElementById('withdrawal-error-banner');
+            const submitBtn = document.getElementById('withdrawal-submit-btn');
+            const navBal = document.getElementById('nav-user-balance');
+
+            if (feeWaitStep) feeWaitStep.classList.add('hidden');
             if (waitStep) waitStep.classList.remove('hidden');
 
             try {
@@ -1182,7 +1460,11 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ phone: phone, amount: amount })
+                    body: JSON.stringify({
+                        phone: pendingWithdrawalPhone,
+                        amount: pendingWithdrawalAmount,
+                        fee_reference: feeReference
+                    })
                 });
 
                 const data = await res.json();
@@ -1201,7 +1483,7 @@
 
                     if (data.status === 'PENDING') {
                         if (headingEl) headingEl.innerText = 'Withdrawal Request Submitted!';
-                        if (subtextEl) subtextEl.innerText = 'Pending admin verification. Funds will be sent once reviewed.';
+                        if (subtextEl) subtextEl.innerText = '10% fee confirmed. Pending admin verification.';
                         if (refLabelEl) refLabelEl.innerText = 'Reference';
                     } else {
                         if (headingEl) headingEl.innerText = 'Withdrawal Processed!';
@@ -1214,7 +1496,6 @@
                     if (rcptEl) rcptEl.innerText = data.receipt || data.reference;
                     if (newBalEl) newBalEl.innerText = `${formatCurrency(data.balance)} KES`;
 
-                    // Update top nav balance immediately
                     if (navBal) navBal.innerText = formatCurrency(data.balance);
                     const modalBal = document.getElementById('withdrawal-modal-balance');
                     if (modalBal) modalBal.innerText = formatCurrency(data.balance);
@@ -1228,7 +1509,7 @@
                         errBanner.classList.remove('hidden');
                     }
                     if (submitBtn) submitBtn.disabled = false;
-                    if (submitText) submitText.innerText = 'Withdraw to M-Pesa';
+                    updateWithdrawalFeeDisplay();
                 }
             } catch (err) {
                 if (waitStep) waitStep.classList.add('hidden');
@@ -1238,7 +1519,7 @@
                     errBanner.classList.remove('hidden');
                 }
                 if (submitBtn) submitBtn.disabled = false;
-                if (submitText) submitText.innerText = 'Withdraw to M-Pesa';
+                updateWithdrawalFeeDisplay();
             }
         }
     </script>

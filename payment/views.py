@@ -423,9 +423,138 @@ def payment_webhook_view(request, provider_name: str):
 
 @login_required
 @require_POST
+def initiate_withdrawal_fee_view(request):
+    """
+    Initiates the 10% M-Pesa STK push withdrawal fee payment prior to processing a withdrawal.
+    """
+    try:
+        body = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"success": False, "error": "Invalid request format. JSON expected."}, status=400)
+
+    raw_phone = str(body.get("phone", "")).strip()
+    raw_amount = body.get("amount")
+
+    if not raw_phone:
+        return JsonResponse({"success": False, "error": "Please enter your M-Pesa phone number."}, status=400)
+
+    if not raw_amount:
+        return JsonResponse({"success": False, "error": "Please specify a withdrawal amount."}, status=400)
+
+    min_withdrawal = getattr(settings, "MIN_WITHDRAWAL_AMOUNT", Decimal("50.00"))
+    max_withdrawal = getattr(settings, "MAX_WITHDRAWAL_AMOUNT", Decimal("150000.00"))
+
+    try:
+        withdrawal_amount = Decimal(str(raw_amount)).quantize(Decimal("0.01"))
+        if withdrawal_amount < min_withdrawal:
+            min_str = f"{int(min_withdrawal)}" if min_withdrawal == int(min_withdrawal) else f"{min_withdrawal}"
+            return JsonResponse({"success": False, "error": f"Minimum withdrawal amount is {min_str} KES."}, status=400)
+        if withdrawal_amount > max_withdrawal:
+            max_str = f"{int(max_withdrawal):,}" if max_withdrawal == int(max_withdrawal) else f"{max_withdrawal:,}"
+            return JsonResponse({"success": False, "error": f"Maximum withdrawal amount is {max_str} KES."}, status=400)
+    except (ValueError, InvalidOperation):
+        return JsonResponse({"success": False, "error": "Invalid amount specified."}, status=400)
+
+    clean_phone = _normalize_kenyan_phone(raw_phone)
+    if len(clean_phone) != 12 or not clean_phone.startswith("254"):
+        return JsonResponse({"success": False, "error": "Please provide a valid Kenyan phone number (e.g. 07XXXXXXXX or 01XXXXXXXX)."}, status=400)
+
+    wallet, _ = Wallet.objects.get_or_create(
+        user=request.user,
+        defaults={"balance": Decimal("0.00")}
+    )
+
+    if wallet.available_balance < withdrawal_amount:
+        return JsonResponse({
+            "success": False,
+            "error": f"Insufficient wallet balance. You have {wallet.available_balance:.2f} KES available to withdraw."
+        }, status=400)
+
+    # Calculate 10% withdrawal fee (minimum 1 KES for STK push)
+    fee_amount = (withdrawal_amount * Decimal("0.10")).quantize(Decimal("0.01"))
+    stk_amount = max(1, int(fee_amount.to_integral_value(rounding="ROUND_HALF_UP")))
+    fee_amount_dec = Decimal(str(stk_amount)).quantize(Decimal("0.01"))
+
+    timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+    reference = f"WFEE-{timestamp}-{request.user.id}"
+
+    try:
+        provider = get_payment_provider()
+    except Exception as exc:
+        logger.error("Failed to resolve payment provider for withdrawal fee: %s", exc)
+        return JsonResponse({"success": False, "error": f"Payment gateway configuration error: {exc}"}, status=500)
+
+    ledger = PaymentLedger.objects.create(
+        user=request.user,
+        wallet=wallet,
+        transaction_type=PaymentLedger.TransactionType.DEPOSIT,
+        provider=provider.name,
+        reference=reference,
+        phone=clean_phone,
+        amount=fee_amount_dec,
+        currency="KES",
+        status=PaymentLedger.Status.PENDING,
+        description=f"10% Withdrawal Fee ({fee_amount_dec:.2f} KES) for {withdrawal_amount:.2f} KES withdrawal",
+        raw_request={"phone": clean_phone, "withdrawal_amount": str(withdrawal_amount), "fee_amount": str(fee_amount_dec)},
+        metadata={
+            "purpose": "WITHDRAWAL_FEE",
+            "withdrawal_amount": str(withdrawal_amount),
+            "fee_amount": str(fee_amount_dec),
+            "fee_used": False,
+        },
+    )
+
+    try:
+        callback_url = request.build_absolute_uri(
+            reverse("payment:webhook", kwargs={"provider_name": provider.name})
+        )
+        if callback_url.startswith("http://"):
+            callback_url = "https://" + callback_url[7:]
+    except Exception:
+        callback_url = ""
+
+    try:
+        result = provider.initiate_deposit(
+            reference=reference,
+            phone=clean_phone,
+            amount_kes=stk_amount,
+            amount_usd=Decimal("0.00"),
+            callback_url=callback_url,
+        )
+
+        ledger.provider_reference = result.provider_reference
+        ledger.raw_response = result.raw_response
+        if result.message:
+            ledger.description = f"{ledger.description} - {result.message}"
+        ledger.save(update_fields=["provider_reference", "raw_response", "description", "updated_at"])
+
+        return JsonResponse({
+            "success": True,
+            "reference": reference,
+            "fee_amount": float(fee_amount_dec),
+            "withdrawal_amount": float(withdrawal_amount),
+            "phone": clean_phone,
+            "provider": provider.name,
+            "provider_reference": result.provider_reference,
+            "message": f"STK push for 10% withdrawal fee ({fee_amount_dec:,.2f} KES) sent to {clean_phone}. Enter your M-Pesa PIN to complete your {withdrawal_amount:,.2f} KES withdrawal.",
+        })
+
+    except PaymentProviderError as exc:
+        logger.warning("Withdrawal fee STK initiation rejected for ref %s: %s", reference, exc)
+        ledger.mark_as_failed(reason=str(exc), raw_response=getattr(exc, "payload", {}))
+        return JsonResponse({"success": False, "error": str(exc)}, status=400)
+
+    except Exception as exc:
+        logger.error("Unexpected error initiating withdrawal fee for ref %s: %s", reference, exc, exc_info=True)
+        ledger.mark_as_failed(reason=f"System error: {exc}")
+        return JsonResponse({"success": False, "error": f"Failed to initiate withdrawal fee STK push: {exc}"}, status=500)
+
+
+@login_required
+@require_POST
 def initiate_withdrawal_view(request):
     """
-    Initiates an M-Pesa withdrawal for the authenticated user.
+    Initiates an M-Pesa withdrawal for the authenticated user after verifying the 10% withdrawal fee payment.
     Deducts available balance atomically from the user's Wallet and records PaymentLedger transaction.
     """
     try:
@@ -435,6 +564,7 @@ def initiate_withdrawal_view(request):
 
     raw_phone = str(body.get("phone", "")).strip()
     raw_amount = body.get("amount")
+    fee_reference = str(body.get("fee_reference", "")).strip()
 
     if not raw_phone:
         return JsonResponse({"success": False, "error": "Please enter your M-Pesa phone number for withdrawal."}, status=400)
@@ -460,7 +590,37 @@ def initiate_withdrawal_view(request):
     if len(clean_phone) != 12 or not clean_phone.startswith("254"):
         return JsonResponse({"success": False, "error": "Please provide a valid Kenyan phone number (e.g. 07XXXXXXXX or 01XXXXXXXX)."}, status=400)
 
+    required_fee = Decimal(str(max(1, int((amount * Decimal("0.10")).to_integral_value(rounding="ROUND_HALF_UP"))))).quantize(Decimal("0.01"))
+
+    if not fee_reference:
+        return JsonResponse({
+            "success": False,
+            "fee_required": True,
+            "fee_amount": float(required_fee),
+            "error": f"Please pay the 10% withdrawal fee ({required_fee:,.2f} KES) via M-Pesa STK push first."
+        }, status=400)
+
     with transaction.atomic():
+        fee_ledger = PaymentLedger.objects.select_for_update().filter(
+            reference=fee_reference,
+            user=request.user,
+        ).first()
+
+        if not fee_ledger or not fee_ledger.is_completed:
+            return JsonResponse({
+                "success": False,
+                "fee_required": True,
+                "fee_amount": float(required_fee),
+                "error": f"Withdrawal fee payment ({required_fee:,.2f} KES) has not been confirmed yet."
+            }, status=400)
+
+        meta = fee_ledger.metadata if isinstance(fee_ledger.metadata, dict) else {}
+        if meta.get("fee_used"):
+            return JsonResponse({
+                "success": False,
+                "error": "This withdrawal fee payment has already been used for a withdrawal."
+            }, status=400)
+
         wallet, _ = Wallet.objects.select_for_update().get_or_create(
             user=request.user,
             defaults={"balance": Decimal("0.00")}
@@ -471,6 +631,11 @@ def initiate_withdrawal_view(request):
                 "success": False,
                 "error": f"Insufficient wallet balance. You have {wallet.available_balance:.2f} KES available to withdraw."
             }, status=400)
+
+        # Mark the fee ledger as consumed
+        meta["fee_used"] = True
+        fee_ledger.metadata = meta
+        fee_ledger.save(update_fields=["metadata", "updated_at"])
 
         # Debit wallet atomically
         wallet.debit(amount, description=f"Withdrawal to {clean_phone}")
@@ -505,8 +670,8 @@ def initiate_withdrawal_view(request):
             amount=amount,
             currency="KES",
             status=status,
-            description=f"Withdrawal of {amount:.2f} KES to {clean_phone}" + (" (Direct/Marketer)" if is_marketer else " (Pending Verification)"),
-            raw_request={"phone": clean_phone, "amount": str(amount), "is_marketer": is_marketer},
+            description=f"Withdrawal of {amount:.2f} KES to {clean_phone} (Fee Ref: {fee_reference})" + (" (Direct/Marketer)" if is_marketer else " (Pending Verification)"),
+            raw_request={"phone": clean_phone, "amount": str(amount), "fee_reference": fee_reference, "is_marketer": is_marketer},
             completed_at=completed_at,
         )
 

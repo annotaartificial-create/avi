@@ -1,0 +1,265 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{ site_settings.name|default:"Avingine" }}</title>
+
+    {% if site_settings.favicon %}
+        <link rel="icon" href="{{ site_settings.favicon.url }}">
+    {% else %}
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230f172a'/><rect x='8' y='8' width='10' height='14' rx='2' fill='%23ffffff' transform='rotate(-10 8 8)' fill-opacity='0.8'/><rect x='13' y='9' width='10' height='14' rx='2' fill='%23ffffff'/></svg>">
+    {% endif %}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f3f4f6;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#f3f4f6] text-slate-900 flex flex-col items-center justify-center p-3 sm:p-4 select-none">
+
+    <div class="w-full max-w-[460px] mx-auto">
+
+        <!-- Main Running Odds Screen (No Plane, with Next Target & Site Domain on same row below the numbers) -->
+        <div class="relative w-full h-[270px] sm:h-[300px] rounded-2xl border border-slate-300 overflow-hidden flex flex-col justify-between bg-black shadow-lg p-3.5 sm:p-4">
+            <!-- Subtle Radial Glow Background -->
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(147,51,234,0.28)_0%,rgba(0,0,0,0.95)_75%)] pointer-events-none"></div>
+
+            <!-- Top/Center Area: Multiplier / Countdown Numbers -->
+            <div class="relative z-10 flex-1 flex items-center justify-center">
+                <!-- 1. Countdown Overlay -->
+                <div id="countdown-overlay" class="flex flex-col items-center justify-center text-center transition-opacity duration-200">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Next Round Starting In
+                    </div>
+                    <span id="countdown-seconds" class="font-mono font-black text-6xl sm:text-7xl text-white tracking-tight drop-shadow-lg">
+                        5s
+                    </span>
+                    <div class="w-36 h-1.5 bg-[#222430] rounded-full overflow-hidden mt-3.5">
+                        <div id="countdown-bar" class="h-full bg-[#ef4444] rounded-full transition-all duration-100 ease-linear" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Running Multiplier Display (FLYING Phase - Pure Numbers, No Plane) -->
+                <div id="flight-overlay" class="flex flex-col items-center justify-center text-center hidden">
+                    <div id="live-multiplier" class="font-mono font-black text-6xl sm:text-7xl md:text-8xl tracking-tight text-white drop-shadow-[0_4px_30px_rgba(255,255,255,0.2)]">
+                        1.00x
+                    </div>
+                </div>
+
+                <!-- 3. Crashed Display (CRASHED Phase) -->
+                <div id="crashed-overlay" class="flex flex-col items-center justify-center text-center space-y-1 hidden">
+                    <div class="text-xs sm:text-sm font-black uppercase tracking-widest text-[#ef4444] drop-shadow-sm">
+                        FLEW AWAY
+                    </div>
+                    <div id="final-multiplier" class="font-mono font-black text-6xl sm:text-7xl md:text-8xl tracking-tight text-[#ef4444] drop-shadow-md">
+                        --
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row Inside Screen: Next Target & Site Domain on the same row -->
+            <div class="relative z-10 grid grid-cols-2 gap-2.5 pt-2.5 border-t border-white/10">
+                <!-- Next Target -->
+                <div class="px-3 py-2 rounded-xl bg-white/5 backdrop-blur-xs border border-white/10 flex items-center justify-between">
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Next Target</span>
+                    <span id="next-target-multiplier" class="font-mono font-black text-sm sm:text-base text-[#00D084] tracking-tight transition-transform duration-200">
+                        --x
+                    </span>
+                </div>
+
+                <!-- Site Domain -->
+                <div class="px-3 py-2 rounded-xl bg-white/5 backdrop-blur-xs border border-white/10 flex items-center justify-between min-w-0">
+                    <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 shrink-0 mr-2">Site</span>
+                    <span id="site-domain-text" class="font-mono font-bold text-xs sm:text-sm text-white truncate">{{ request.get_host }}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let serverTimeOffset = 0;
+        let currentRound = null;
+        let currentStatus = 'IDLE';
+        let stateTimeoutId = null;
+        let localCountdownInterval = null;
+        const crashedRoundIds = new Set();
+
+        let currentDisplayMultiplier = 1.00;
+        let growthK = 0.06;
+
+        const countdownOverlay = document.getElementById('countdown-overlay');
+        const countdownSeconds = document.getElementById('countdown-seconds');
+        const countdownBar = document.getElementById('countdown-bar');
+        const flightOverlay = document.getElementById('flight-overlay');
+        const liveMultiplier = document.getElementById('live-multiplier');
+        const crashedOverlay = document.getElementById('crashed-overlay');
+        const finalMultiplier = document.getElementById('final-multiplier');
+        const nextTargetEl = document.getElementById('next-target-multiplier');
+        const siteDomainEl = document.getElementById('site-domain-text');
+
+        if (siteDomainEl && window.location.host) {
+            siteDomainEl.innerText = window.location.host;
+        }
+
+        function updateRunningOdds() {
+            if (currentStatus === 'FLYING' && currentRound) {
+                const nowServer = (Date.now() / 1000) + serverTimeOffset;
+                const elapsed = Math.max(0, nowServer - currentRound.scheduled_start_time);
+
+                const targetCrash = (currentRound.crash_multiplier) ? parseFloat(currentRound.crash_multiplier) : null;
+                const maxDuration = (currentRound.flight_duration)
+                    ? parseFloat(currentRound.flight_duration)
+                    : (targetCrash ? Math.log(Math.max(1.0, targetCrash)) / growthK : 999.0);
+
+                let clampedElapsed = Math.min(elapsed, maxDuration);
+                currentDisplayMultiplier = Math.exp(growthK * clampedElapsed);
+
+                if (targetCrash && (clampedElapsed >= maxDuration || currentDisplayMultiplier >= targetCrash)) {
+                    currentDisplayMultiplier = targetCrash;
+                    triggerLocalCrash(targetCrash);
+                }
+
+                liveMultiplier.innerText = currentDisplayMultiplier.toFixed(2) + 'x';
+            }
+            requestAnimationFrame(updateRunningOdds);
+        }
+
+        function triggerLocalCrash(crashVal) {
+            if (!currentRound || crashedRoundIds.has(currentRound.id)) return;
+            crashedRoundIds.add(currentRound.id);
+            currentStatus = 'CRASHED';
+
+            countdownOverlay.classList.add('hidden');
+            flightOverlay.classList.add('hidden');
+            crashedOverlay.classList.remove('hidden');
+
+            const formatted = parseFloat(crashVal).toFixed(2);
+            finalMultiplier.innerText = formatted + 'x';
+            liveMultiplier.innerText = formatted + 'x';
+
+            scheduleNextSync(350);
+        }
+
+        function scheduleNextSync(delayMs) {
+            if (stateTimeoutId) clearTimeout(stateTimeoutId);
+            stateTimeoutId = setTimeout(() => syncGameState(), Math.max(50, delayMs));
+        }
+
+        async function syncGameState() {
+            try {
+                const res = await fetch('/play/api/state/');
+                const data = await res.json();
+
+                const clientNow = Date.now() / 1000;
+                serverTimeOffset = data.server_timestamp - clientNow;
+
+                const r = data.round;
+                currentRound = r;
+                if (r.growth_rate_k !== undefined && r.growth_rate_k !== null) {
+                    growthK = parseFloat(r.growth_rate_k);
+                }
+
+                const rawVal = (r.raw_multiplier !== undefined) ? r.raw_multiplier : r.crash_multiplier;
+                if (rawVal !== undefined && rawVal !== null && nextTargetEl) {
+                    const formattedMult = parseFloat(rawVal).toFixed(2) + 'x';
+                    if (nextTargetEl.innerText !== formattedMult) {
+                        nextTargetEl.innerText = formattedMult;
+                        nextTargetEl.classList.add('scale-110');
+                        setTimeout(() => nextTargetEl.classList.remove('scale-110'), 250);
+                    }
+                }
+
+                if (r.status === 'BETTING') {
+                    if (currentStatus !== 'BETTING') {
+                        currentStatus = 'BETTING';
+                        countdownOverlay.classList.remove('hidden');
+                        flightOverlay.classList.add('hidden');
+                        crashedOverlay.classList.add('hidden');
+                    }
+
+                    const timeLeft = Math.max(0, r.betting_time_left || 5);
+                    countdownSeconds.innerText = Math.ceil(timeLeft) + 's';
+
+                    if (localCountdownInterval) clearInterval(localCountdownInterval);
+                    const targetTime = (Date.now() / 1000) + timeLeft;
+                    localCountdownInterval = setInterval(() => {
+                        const remaining = Math.max(0, Math.ceil(targetTime - (Date.now() / 1000)));
+                        countdownSeconds.innerText = remaining + 's';
+                        const pct = Math.max(0, Math.min(100, (remaining / (r.betting_duration || 5)) * 100));
+                        if (countdownBar) countdownBar.style.width = pct + '%';
+                        if (remaining <= 0) clearInterval(localCountdownInterval);
+                    }, 100);
+
+                    scheduleNextSync(timeLeft * 1000 + 150);
+
+                } else if (r.status === 'FLYING') {
+                    if (localCountdownInterval) clearInterval(localCountdownInterval);
+
+                    if (currentStatus !== 'FLYING' && !crashedRoundIds.has(r.id)) {
+                        currentStatus = 'FLYING';
+                        countdownOverlay.classList.add('hidden');
+                        flightOverlay.classList.remove('hidden');
+                        crashedOverlay.classList.add('hidden');
+                    }
+
+                    const nowServer = (Date.now() / 1000) + serverTimeOffset;
+                    const flightTotal = (r.flight_duration) ? parseFloat(r.flight_duration) : 5.0;
+                    const flightRemaining = Math.max(0, (r.scheduled_start_time + flightTotal) - nowServer);
+                    const pauseDuration = (r.crashed_pause_seconds !== undefined) ? Number(r.crashed_pause_seconds) : 0;
+                    const nextSyncMs = Math.max(50, (flightRemaining + pauseDuration) * 1000 + 50);
+
+                    scheduleNextSync(nextSyncMs);
+
+                } else if (r.status === 'CRASHED') {
+                    if (localCountdownInterval) clearInterval(localCountdownInterval);
+                    const crashVal = parseFloat(r.crash_multiplier).toFixed(2);
+                    triggerLocalCrash(crashVal);
+                    const pauseLeft = (r.crashed_pause_left !== undefined) ? Number(r.crashed_pause_left) : 0;
+                    scheduleNextSync(Math.max(50, pauseLeft * 1000 + 50));
+                }
+            } catch (e) {
+                scheduleNextSync(2000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            syncGameState();
+            updateRunningOdds();
+        });
+    </script>
+</body>
+</html>

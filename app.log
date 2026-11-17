@@ -350,3 +350,178 @@ django.db.utils.OperationalError: database is locked
 2026-10-30 00:49:54,702 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2184
 2026-10-30 00:50:07,499 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2181
 2026-10-30 00:50:09,257 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2548
+2026-11-17 11:05:45,416 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-11-17 11:05:53,962 | INFO     | django.server | "GET / HTTP/1.1" 200 39418
+2026-11-17 11:05:56,988 | INFO     | django.server | "GET /static/images/hero.png HTTP/1.1" 200 55310
+2026-11-17 11:05:59,697 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:05:59,699 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:06:21,273 | INFO     | django.server | "GET /play/signal/ HTTP/1.1" 200 16707
+2026-11-17 11:06:23,223 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1664
+2026-11-17 11:06:25,009 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:06:25,010 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:06:28,432 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1663
+2026-11-17 11:06:40,345 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1513
+2026-11-17 11:06:45,564 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1512
+2026-11-17 11:06:57,766 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2260
+2026-11-17 11:07:03,289 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2258
+2026-11-17 11:07:26,298 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1927
+2026-11-17 11:07:32,298 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1927
+2026-11-17 11:07:37,296 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1434
+2026-11-17 11:07:43,279 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1431
+2026-11-17 11:08:15,322 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2163
+2026-11-17 11:08:21,282 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2162
+2026-11-17 11:08:43,332 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2014
+2026-11-17 11:08:49,277 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2013
+2026-11-17 11:08:54,295 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2050
+2026-11-17 11:09:00,286 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2049
+2026-11-17 11:09:08,293 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2435
+2026-11-17 11:09:14,277 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2432
+2026-11-17 11:09:35,285 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1941
+2026-11-17 11:09:41,272 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1938
+2026-11-17 11:10:13,305 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1972
+2026-11-17 11:10:19,275 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1971
+2026-11-17 11:10:35,314 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1652
+2026-11-17 11:10:41,345 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1651
+2026-11-17 11:10:43,305 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1865
+2026-11-17 11:10:49,312 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1863
+2026-11-17 11:10:50,328 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2246
+2026-11-17 11:10:51,538 | INFO     | django.utils.autoreload | C:\projects\avi\engine\views.py changed, reloading.
+2026-11-17 11:10:55,230 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-11-17 11:10:56,415 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2244
+2026-11-17 11:11:30,271 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2620
+2026-11-17 11:11:35,532 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2619
+2026-11-17 11:11:37,775 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2496
+2026-11-17 11:11:42,989 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2494
+2026-11-17 11:12:23,877 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1783
+2026-11-17 11:12:29,123 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1783
+2026-11-17 11:12:57,902 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2665
+2026-11-17 11:13:03,456 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2663
+2026-11-17 11:13:08,062 | INFO     | django.server | "GET /play/signal/ HTTP/1.1" 302 0
+2026-11-17 11:13:10,726 | INFO     | django.server | "GET /auth/login/?next=/play/signal/ HTTP/1.1" 200 13685
+2026-11-17 11:13:16,094 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:13:16,095 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:13:22,771 | INFO     | django.server | "POST /auth/login/?next=/play/signal/ HTTP/1.1" 200 13923
+2026-11-17 11:13:26,775 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:13:26,775 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:13:31,609 | INFO     | django.server | "POST /auth/login/?next=/play/signal/ HTTP/1.1" 200 13923
+2026-11-17 11:13:35,412 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:13:35,412 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:13:50,037 | INFO     | django.server | "GET /auth/signup/ HTTP/1.1" 200 15421
+2026-11-17 11:13:53,995 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:13:53,998 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:14:09,259 | INFO     | django.server | "POST /auth/signup/ HTTP/1.1" 302 0
+2026-11-17 11:14:09,466 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 151318
+2026-11-17 11:14:13,495 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1791
+2026-11-17 11:14:15,902 | INFO     | django.server | "GET /static/audio/aviator_flew_away.wav?v=4 HTTP/1.1" 200 423404
+2026-11-17 11:14:16,165 | INFO     | django.server | "GET /static/audio/aviator_propeller.wav?v=4 HTTP/1.1" 200 352844
+2026-11-17 11:14:16,171 | INFO     | django.server | "GET /static/audio/aviator_theme.wav?v=4 HTTP/1.1" 200 1411244
+2026-11-17 11:14:17,977 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:14:17,977 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:14:19,155 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1790
+2026-11-17 11:14:22,455 | WARNING  | django.request | Forbidden: /play/signal/
+2026-11-17 11:14:22,463 | WARNING  | django.server | "GET /play/signal/ HTTP/1.1" 403 1727
+2026-11-17 11:14:23,942 | WARNING  | django.request | Not Found: /favicon.ico
+2026-11-17 11:14:23,945 | WARNING  | django.server | "GET /favicon.ico HTTP/1.1" 404 3870
+2026-11-17 11:14:25,802 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:14:25,805 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:14:27,647 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 151318
+2026-11-17 11:14:29,768 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1791
+2026-11-17 11:14:31,491 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1794
+2026-11-17 11:14:32,727 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:14:32,731 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:14:36,838 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1793
+2026-11-17 11:15:35,560 | INFO     | django.utils.autoreload | Watching for file changes with StatReloader
+2026-11-17 11:15:37,335 | INFO     | django.server | "GET / HTTP/1.1" 200 39418
+2026-11-17 11:15:38,510 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2676
+2026-11-17 11:15:39,600 | INFO     | django.server | "GET /static/images/hero.png HTTP/1.1" 200 55310
+2026-11-17 11:15:41,858 | INFO     | django.server | "GET /auth/login/ HTTP/1.1" 200 13683
+2026-11-17 11:15:44,316 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2674
+2026-11-17 11:15:50,318 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1967
+2026-11-17 11:15:50,570 | INFO     | django.server | "POST /auth/login/?next=engine:game HTTP/1.1" 302 0
+2026-11-17 11:15:50,635 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 152140
+2026-11-17 11:15:51,919 | INFO     | django.server | "GET /static/audio/aviator_theme.wav?v=4 HTTP/1.1" 200 1411244
+2026-11-17 11:15:51,996 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1968
+2026-11-17 11:15:52,100 | INFO     | django.server | "GET /static/audio/aviator_flew_away.wav?v=4 HTTP/1.1" 200 423404
+2026-11-17 11:15:52,113 | INFO     | django.server | "GET /static/audio/aviator_propeller.wav?v=4 HTTP/1.1" 200 352844
+2026-11-17 11:15:56,321 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1966
+2026-11-17 11:16:03,879 | INFO     | django.server | "GET /play/signal/ HTTP/1.1" 200 14560
+2026-11-17 11:16:04,729 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1966
+2026-11-17 11:16:05,271 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1790
+2026-11-17 11:16:10,494 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1789
+2026-11-17 11:16:20,836 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2682
+2026-11-17 11:16:26,059 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2681
+2026-11-17 11:17:05,579 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2145
+2026-11-17 11:17:11,391 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2144
+2026-11-17 11:17:16,450 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1800
+2026-11-17 11:17:23,484 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1799
+2026-11-17 11:17:28,551 | INFO     | django.server | "GET /admin HTTP/1.1" 301 0
+2026-11-17 11:17:32,266 | INFO     | django.server | "GET /admin/ HTTP/1.1" 200 8783
+2026-11-17 11:17:32,702 | INFO     | django.server | "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2694
+2026-11-17 11:17:32,702 | INFO     | django.server | "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 2929
+2026-11-17 11:17:32,915 | INFO     | django.server | "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+2026-11-17 11:17:32,993 | INFO     | django.server | "GET /static/admin/css/dashboard.css HTTP/1.1" 200 441
+2026-11-17 11:17:33,015 | INFO     | django.server | "GET /static/admin/js/theme.js HTTP/1.1" 200 1943
+2026-11-17 11:17:33,101 | INFO     | django.server | "GET /static/admin/css/base.css HTTP/1.1" 200 21310
+2026-11-17 11:17:33,141 | INFO     | django.server | "GET /static/admin/css/responsive.css HTTP/1.1" 200 18559
+2026-11-17 11:17:33,272 | INFO     | django.server | "GET /static/admin/img/icon-yes.svg HTTP/1.1" 200 436
+2026-11-17 11:17:33,345 | INFO     | django.server | "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 380
+2026-11-17 11:17:33,736 | INFO     | django.server | "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 331
+2026-11-17 11:17:37,568 | INFO     | django.server | "GET /admin/payment/wallet/ HTTP/1.1" 200 13212
+2026-11-17 11:17:37,858 | INFO     | django.server | "GET /static/admin/js/core.js HTTP/1.1" 200 5682
+2026-11-17 11:17:37,878 | INFO     | django.server | "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 200 8943
+2026-11-17 11:17:37,907 | INFO     | django.server | "GET /static/admin/js/jquery.init.js HTTP/1.1" 200 347
+2026-11-17 11:17:37,942 | INFO     | django.server | "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+2026-11-17 11:17:38,075 | INFO     | django.server | "GET /static/admin/js/actions.js HTTP/1.1" 200 7872
+2026-11-17 11:17:38,107 | INFO     | django.server | "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 200 292458
+2026-11-17 11:17:38,134 | INFO     | django.server | "GET /static/admin/img/search.svg HTTP/1.1" 200 458
+2026-11-17 11:17:38,161 | INFO     | django.server | "GET /static/admin/css/changelists.css HTTP/1.1" 200 6566
+2026-11-17 11:17:38,323 | INFO     | django.server | "GET /static/admin/js/urlify.js HTTP/1.1" 200 7887
+2026-11-17 11:17:38,368 | INFO     | django.server | "GET /static/admin/js/prepopulate.js HTTP/1.1" 200 1531
+2026-11-17 11:17:38,572 | INFO     | django.server | "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 200 232381
+2026-11-17 11:17:38,635 | INFO     | django.server | "GET /static/admin/js/filters.js HTTP/1.1" 200 978
+2026-11-17 11:17:38,844 | INFO     | django.server | "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 200 331
+2026-11-17 11:17:41,756 | INFO     | django.server | "GET /admin/payment/wallet/1/change/ HTTP/1.1" 200 16025
+2026-11-17 11:17:42,005 | INFO     | django.server | "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+2026-11-17 11:17:42,042 | INFO     | django.server | "GET /static/admin/css/forms.css HTTP/1.1" 200 9090
+2026-11-17 11:17:42,068 | INFO     | django.server | "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+2026-11-17 11:17:42,218 | INFO     | django.server | "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+2026-11-17 11:17:42,325 | INFO     | django.server | "GET /static/admin/css/widgets.css HTTP/1.1" 200 11921
+2026-11-17 11:17:42,636 | INFO     | django.server | "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+2026-11-17 11:17:50,603 | INFO     | django.server | "POST /admin/payment/wallet/1/change/ HTTP/1.1" 302 0
+2026-11-17 11:17:50,833 | INFO     | django.server | "GET /admin/payment/wallet/ HTTP/1.1" 200 13468
+2026-11-17 11:17:51,187 | INFO     | django.server | "GET /admin/jsi18n/ HTTP/1.1" 200 3343
+2026-11-17 11:17:55,020 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2679
+2026-11-17 11:17:59,130 | INFO     | django.server | "GET /play/ HTTP/1.1" 200 151322
+2026-11-17 11:18:04,084 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2678
+2026-11-17 11:18:06,599 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2683
+2026-11-17 11:18:07,008 | WARNING  | django.request | Not Found: /sw.js
+2026-11-17 11:18:07,010 | WARNING  | django.server | "GET /sw.js HTTP/1.1" 404 3852
+2026-11-17 11:18:12,084 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2683
+2026-11-17 11:18:24,167 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1796
+2026-11-17 11:18:29,577 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1795
+2026-11-17 11:18:41,255 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2326
+2026-11-17 11:18:42,462 | WARNING  | payment.views | Withdrawal fee STK initiation rejected for ref WFEE-20261117081842-1: PAYHERO_AUTH_TOKEN is missing or not configured in settings/.env
+2026-11-17 11:18:42,513 | WARNING  | django.request | Bad Request: /payment/withdraw/fee/initiate/
+2026-11-17 11:18:42,520 | WARNING  | django.server | "POST /payment/withdraw/fee/initiate/ HTTP/1.1" 400 95
+2026-11-17 11:18:46,635 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2324
+2026-11-17 11:18:48,901 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2159
+2026-11-17 11:18:54,859 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2158
+2026-11-17 11:18:59,656 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2153
+2026-11-17 11:19:05,035 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2152
+2026-11-17 11:19:08,828 | WARNING  | payment.views | Payment initiation rejected for ref DEP-20261117081908-1: PAYHERO_AUTH_TOKEN is missing or not configured in settings/.env
+2026-11-17 11:19:08,925 | WARNING  | django.request | Bad Request: /payment/deposit/initiate/
+2026-11-17 11:19:08,929 | WARNING  | django.server | "POST /payment/deposit/initiate/ HTTP/1.1" 400 95
+2026-11-17 11:19:47,368 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2156
+2026-11-17 11:19:53,393 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2155
+2026-11-17 11:20:15,875 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2326
+2026-11-17 11:20:22,346 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2325
+2026-11-17 11:21:02,391 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2150
+2026-11-17 11:21:08,366 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2149
+2026-11-17 11:21:09,369 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2500
+2026-11-17 11:21:15,858 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2499
+2026-11-17 11:21:16,358 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1967
+2026-11-17 11:21:22,380 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 1966
+2026-11-17 11:21:27,415 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2330
+2026-11-17 11:21:33,349 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2329
+2026-11-17 11:21:54,426 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2511
+2026-11-17 11:22:00,316 | INFO     | django.server | "GET /play/api/state/ HTTP/1.1" 200 2510

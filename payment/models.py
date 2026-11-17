@@ -291,8 +291,9 @@ class PaymentLedger(models.Model):
                 'status', 'receipt_number', 'raw_response', 'description', 'completed_at', 'updated_at'
             ])
 
-            # Credit user wallet if deposit
-            if locked.transaction_type == self.TransactionType.DEPOSIT:
+            # Credit user wallet if standard deposit (skip crediting if this is a 10% withdrawal fee payment)
+            is_withdrawal_fee = isinstance(locked.metadata, dict) and locked.metadata.get('purpose') == 'WITHDRAWAL_FEE'
+            if locked.transaction_type == self.TransactionType.DEPOSIT and not is_withdrawal_fee:
                 locked.wallet.credit(locked.amount, description=f"Deposit via {locked.provider} ({locked.reference})")
 
             # Update in-memory fields on self

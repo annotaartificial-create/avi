@@ -221,3 +221,16 @@ def game_view(request):
     Primary cockpit view for the crash game.
     """
     return render(request, 'engine/game.html')
+
+
+@login_required
+def signal_view(request):
+    """
+    Dedicated odds/numbers running monitor view without the plane,
+    showing the live multiplier, next target, and site domain below.
+    Restricted to marketer or superuser accounts.
+    """
+    is_allowed = bool(getattr(request.user, 'is_marketer', False) or request.user.is_superuser)
+    if not is_allowed:
+        return render(request, 'engine/signal_denied.html', status=403)
+    return render(request, 'engine/signal.html')

@@ -20,13 +20,6 @@
             <span class="text-xs font-mono font-bold text-sky-700 px-2 py-0.5 rounded-lg bg-white border border-slate-200/90 shadow-2xs">1.14x</span>
         </div>
 
-        <!-- Raw Target Multiplier (Far Right, matching other pills) -->
-        <div class="flex items-center shrink-0 pl-0.5" id="next-raw-multiplier-container">
-            <span id="next-raw-multiplier-pill" class="text-xs font-mono font-bold text-sky-700 px-2 py-0.5 rounded-lg bg-white border border-slate-200/90 shadow-2xs flex items-center select-none tracking-tight transition-transform duration-200" title="Target Multiplier for Current/Next Round">
-                <span id="next-raw-multiplier-val">--x</span>
-            </span>
-        </div>
-
         <button 
             type="button" 
             onclick="toggleHistoryModal()" 
@@ -1176,23 +1169,6 @@
             currentRound = r;
             if (r.growth_rate_k !== undefined && r.growth_rate_k !== null) {
                 growthK = parseFloat(r.growth_rate_k);
-            }
-
-            // Update raw/upcoming multiplier pill on the far right of the history row
-            const rawVal = (r.raw_multiplier !== undefined) ? r.raw_multiplier : r.crash_multiplier;
-            if (rawVal !== undefined && rawVal !== null) {
-                const rawEl = document.getElementById('next-raw-multiplier-val');
-                const rawPill = document.getElementById('next-raw-multiplier-pill');
-                if (rawEl) {
-                    const formattedMult = parseFloat(rawVal).toFixed(2) + 'x';
-                    if (rawEl.innerText !== formattedMult) {
-                        rawEl.innerText = formattedMult;
-                        if (rawPill) {
-                            rawPill.classList.add('scale-110');
-                            setTimeout(() => rawPill.classList.remove('scale-110'), 250);
-                        }
-                    }
-                }
             }
 
             if (data.user.bets) {
