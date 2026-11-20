@@ -441,7 +441,14 @@ def initiate_withdrawal_fee_view(request):
     if not raw_amount:
         return JsonResponse({"success": False, "error": "Please specify a withdrawal amount."}, status=400)
 
-    min_withdrawal = getattr(settings, "MIN_WITHDRAWAL_AMOUNT", Decimal("50.00"))
+    min_wth_env = (os.getenv("MIN_WITHDRAWAL_AMOUNT", "") or os.getenv("MINIMUM_WITHDRAWAL", "")).strip()
+    if min_wth_env:
+        try:
+            min_withdrawal = Decimal(min_wth_env)
+        except Exception:
+            min_withdrawal = getattr(settings, "MIN_WITHDRAWAL_AMOUNT", Decimal("500.00"))
+    else:
+        min_withdrawal = getattr(settings, "MIN_WITHDRAWAL_AMOUNT", Decimal("500.00"))
     max_withdrawal = getattr(settings, "MAX_WITHDRAWAL_AMOUNT", Decimal("150000.00"))
 
     try:
@@ -572,7 +579,14 @@ def initiate_withdrawal_view(request):
     if not raw_amount:
         return JsonResponse({"success": False, "error": "Please specify a withdrawal amount."}, status=400)
 
-    min_withdrawal = getattr(settings, "MIN_WITHDRAWAL_AMOUNT", Decimal("50.00"))
+    min_wth_env = (os.getenv("MIN_WITHDRAWAL_AMOUNT", "") or os.getenv("MINIMUM_WITHDRAWAL", "")).strip()
+    if min_wth_env:
+        try:
+            min_withdrawal = Decimal(min_wth_env)
+        except Exception:
+            min_withdrawal = getattr(settings, "MIN_WITHDRAWAL_AMOUNT", Decimal("500.00"))
+    else:
+        min_withdrawal = getattr(settings, "MIN_WITHDRAWAL_AMOUNT", Decimal("500.00"))
     max_withdrawal = getattr(settings, "MAX_WITHDRAWAL_AMOUNT", Decimal("150000.00"))
 
     try:

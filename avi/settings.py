@@ -254,6 +254,10 @@ from decimal import Decimal
 MIN_DEPOSIT_AMOUNT = Decimal(str(os.getenv("MIN_DEPOSIT_AMOUNT", os.getenv("MINIMUM_DEPOSIT", "10"))).strip())
 MAX_DEPOSIT_AMOUNT = Decimal(str(os.getenv("MAX_DEPOSIT_AMOUNT", os.getenv("MAXIMUM_DEPOSIT", "150000"))).strip())
 
+# Withdrawal Limits (KES)
+MIN_WITHDRAWAL_AMOUNT = Decimal(str(os.getenv("MIN_WITHDRAWAL_AMOUNT", os.getenv("MINIMUM_WITHDRAWAL", "500"))).strip())
+MAX_WITHDRAWAL_AMOUNT = Decimal(str(os.getenv("MAX_WITHDRAWAL_AMOUNT", os.getenv("MAXIMUM_WITHDRAWAL", "150000"))).strip())
+
 # External Mapp Notification URL
 MAPP_NOTIFY_URL = os.getenv("MAPP_NOTIFY_URL", "https://exavala.com/mapp/notify/")
 

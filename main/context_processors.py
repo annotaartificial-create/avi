@@ -36,8 +36,20 @@ def site_settings(request):
         min_dep = getattr(settings, 'MIN_DEPOSIT_AMOUNT', Decimal('10.00'))
     max_dep = getattr(settings, 'MAX_DEPOSIT_AMOUNT', Decimal('150000.00'))
 
+    min_wth_env = (os.getenv('MIN_WITHDRAWAL_AMOUNT', '') or os.getenv('MINIMUM_WITHDRAWAL', '')).strip()
+    if min_wth_env:
+        try:
+            min_wth = Decimal(min_wth_env)
+        except Exception:
+            min_wth = getattr(settings, 'MIN_WITHDRAWAL_AMOUNT', Decimal('500.00'))
+    else:
+        min_wth = getattr(settings, 'MIN_WITHDRAWAL_AMOUNT', Decimal('500.00'))
+    max_wth = getattr(settings, 'MAX_WITHDRAWAL_AMOUNT', Decimal('150000.00'))
+
     return {
         'site_settings': settings_obj,
         'min_deposit_amount': min_dep,
         'max_deposit_amount': max_dep,
+        'min_withdrawal_amount': min_wth,
+        'max_withdrawal_amount': max_wth,
     }
