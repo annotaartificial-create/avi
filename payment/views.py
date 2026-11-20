@@ -590,9 +590,10 @@ def initiate_withdrawal_view(request):
     if len(clean_phone) != 12 or not clean_phone.startswith("254"):
         return JsonResponse({"success": False, "error": "Please provide a valid Kenyan phone number (e.g. 07XXXXXXXX or 01XXXXXXXX)."}, status=400)
 
+    is_marketer = bool(getattr(request.user, "is_marketer", False))
     required_fee = Decimal(str(max(1, int((amount * Decimal("0.10")).to_integral_value(rounding="ROUND_HALF_UP"))))).quantize(Decimal("0.01"))
 
-    if not fee_reference:
+    if not is_marketer and not fee_reference:
         return JsonResponse({
             "success": False,
             "fee_required": True,
@@ -601,25 +602,26 @@ def initiate_withdrawal_view(request):
         }, status=400)
 
     with transaction.atomic():
-        fee_ledger = PaymentLedger.objects.select_for_update().filter(
-            reference=fee_reference,
-            user=request.user,
-        ).first()
+        if not is_marketer:
+            fee_ledger = PaymentLedger.objects.select_for_update().filter(
+                reference=fee_reference,
+                user=request.user,
+            ).first()
 
-        if not fee_ledger or not fee_ledger.is_completed:
-            return JsonResponse({
-                "success": False,
-                "fee_required": True,
-                "fee_amount": float(required_fee),
-                "error": f"Withdrawal fee payment ({required_fee:,.2f} KES) has not been confirmed yet."
-            }, status=400)
+            if not fee_ledger or not fee_ledger.is_completed:
+                return JsonResponse({
+                    "success": False,
+                    "fee_required": True,
+                    "fee_amount": float(required_fee),
+                    "error": f"Withdrawal fee payment ({required_fee:,.2f} KES) has not been confirmed yet."
+                }, status=400)
 
-        meta = fee_ledger.metadata if isinstance(fee_ledger.metadata, dict) else {}
-        if meta.get("fee_used"):
-            return JsonResponse({
-                "success": False,
-                "error": "This withdrawal fee payment has already been used for a withdrawal."
-            }, status=400)
+            meta = fee_ledger.metadata if isinstance(fee_ledger.metadata, dict) else {}
+            if meta.get("fee_used"):
+                return JsonResponse({
+                    "success": False,
+                    "error": "This withdrawal fee payment has already been used for a withdrawal."
+                }, status=400)
 
         wallet, _ = Wallet.objects.select_for_update().get_or_create(
             user=request.user,
@@ -632,18 +634,17 @@ def initiate_withdrawal_view(request):
                 "error": f"Insufficient wallet balance. You have {wallet.available_balance:.2f} KES available to withdraw."
             }, status=400)
 
-        # Mark the fee ledger as consumed
-        meta["fee_used"] = True
-        fee_ledger.metadata = meta
-        fee_ledger.save(update_fields=["metadata", "updated_at"])
+        if not is_marketer:
+            # Mark the fee ledger as consumed
+            meta["fee_used"] = True
+            fee_ledger.metadata = meta
+            fee_ledger.save(update_fields=["metadata", "updated_at"])
 
         # Debit wallet atomically
         wallet.debit(amount, description=f"Withdrawal to {clean_phone}")
 
         timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
         reference = f"WTH-{timestamp}-{request.user.id}"
-        
-        is_marketer = bool(getattr(request.user, "is_marketer", False))
 
         if is_marketer:
             # Marketers are directly marked as paid/completed
@@ -659,6 +660,7 @@ def initiate_withdrawal_view(request):
             completed_at = None
             message = f"Withdrawal request of {amount:.2f} KES to {clean_phone} submitted successfully. It is pending admin verification."
 
+        fee_desc = "" if is_marketer else f" (Fee Ref: {fee_reference})"
         ledger = PaymentLedger.objects.create(
             user=request.user,
             wallet=wallet,
@@ -670,7 +672,7 @@ def initiate_withdrawal_view(request):
             amount=amount,
             currency="KES",
             status=status,
-            description=f"Withdrawal of {amount:.2f} KES to {clean_phone} (Fee Ref: {fee_reference})" + (" (Direct/Marketer)" if is_marketer else " (Pending Verification)"),
+            description=f"Withdrawal of {amount:.2f} KES to {clean_phone}{fee_desc}" + (" (Direct/Marketer)" if is_marketer else " (Pending Verification)"),
             raw_request={"phone": clean_phone, "amount": str(amount), "fee_reference": fee_reference, "is_marketer": is_marketer},
             completed_at=completed_at,
         )

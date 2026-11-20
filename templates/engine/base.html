@@ -606,6 +606,7 @@
                     <button type="button" onclick="setWithdrawalMax()" class="wth-chip py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition-colors cursor-pointer">All (Max)</button>
                 </div>
 
+                {% if not request.user.is_marketer %}
                 <!-- 10% Withdrawal Fee Summary Box -->
                 <div class="p-3 rounded-xl bg-amber-50/90 border border-amber-200 space-y-1 text-xs">
                     <div class="flex items-center justify-between">
@@ -619,6 +620,7 @@
                         A 10% processing fee is required via M-Pesa STK push before your withdrawal of <strong id="withdrawal-amount-summary" class="font-mono">100.00 KES</strong> is dispatched.
                     </p>
                 </div>
+                {% endif %}
 
                 <!-- Error Message Banner -->
                 <div id="withdrawal-error-banner" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"></div>
@@ -631,7 +633,7 @@
                     class="w-full py-3 rounded-xl bg-slate-900 hover:bg-black text-white font-extrabold text-sm transition-all shadow-md active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
                 >
                     <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
-                    <span id="withdrawal-submit-btn-text">Pay 10% Fee & Withdraw</span>
+                    <span id="withdrawal-submit-btn-text">{% if request.user.is_marketer %}Withdraw to M-Pesa{% else %}Pay 10% Fee & Withdraw{% endif %}</span>
                 </button>
             </div>
 
@@ -1117,6 +1119,7 @@
         // =========================================================================
         // M-PESA WITHDRAWAL LOGIC (WITH 10% STK PUSH FEE PROMPT FIRST)
         // =========================================================================
+        const IS_MARKETER_USER = {% if request.user.is_authenticated and request.user.is_marketer %}true{% else %}false{% endif %};
         let currentWithdrawalFeeReference = null;
         let pendingWithdrawalPhone = '';
         let pendingWithdrawalAmount = 0;
@@ -1170,7 +1173,13 @@
 
             if (feeEl) feeEl.innerText = `${formatCurrency(fee)} KES`;
             if (sumEl) sumEl.innerText = `${formatCurrency(rawVal)} KES`;
-            if (submitText) submitText.innerText = rawVal > 0 ? `Pay ${formatCurrency(fee)} KES Fee & Withdraw` : 'Pay 10% Fee & Withdraw';
+            if (submitText) {
+                if (IS_MARKETER_USER) {
+                    submitText.innerText = 'Withdraw to M-Pesa';
+                } else {
+                    submitText.innerText = rawVal > 0 ? `Pay ${formatCurrency(fee)} KES Fee & Withdraw` : 'Pay 10% Fee & Withdraw';
+                }
+            }
         }
 
         function resetWithdrawalModal() {
@@ -1284,6 +1293,15 @@
             const feeAmount = Math.max(1, Math.round(amount * 0.10));
             pendingWithdrawalPhone = phone;
             pendingWithdrawalAmount = amount;
+
+            if (IS_MARKETER_USER) {
+                if (submitBtn) submitBtn.disabled = true;
+                if (submitText) submitText.innerText = 'Processing Withdrawal...';
+                const formStep = document.getElementById('withdrawal-form-step');
+                if (formStep) formStep.classList.add('hidden');
+                await finalizeWithdrawalAfterFee('');
+                return;
+            }
 
             if (submitBtn) submitBtn.disabled = true;
             if (submitText) submitText.innerText = `Sending ${formatCurrency(feeAmount)} KES Fee STK...`;
